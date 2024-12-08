@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Able-Live
+Exec=/usr/local/bin/able-live.sh

@@ -1,0 +1,10 @@
+.git
+.vs
+packages
+**/x64
+**/debug
+**/Debug
+**/release
+**/Release
+**/~AutoRecover*
+power-lights-panel/power-lights-panel
