@@ -8,6 +8,7 @@ while [ 1 ]
 do
   if [ ! -f /usr/local/bin/able-suppress.dat ]
   then
+    /home/pi/get-pilotaware-url.sh
     ./run.sh >>/home/pi/able-live.log
   fi
 
