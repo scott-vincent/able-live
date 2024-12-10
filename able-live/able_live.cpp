@@ -18,6 +18,7 @@ void showChart();
 int main(int argc, char **argv)
 {
     printf("Able Live %s Copyright (c) 2024 Scott Vincent\n", versionString);
+    fflush(stdout);
 
     strcpy(_moduleFilename, argv[0]);
 
