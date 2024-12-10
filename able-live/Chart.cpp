@@ -652,6 +652,14 @@ void switchChart(int num)
     doUpdate();
 }
 
+void expandBorder(int num, Locn* min, Locn* max)
+{
+    min->lat = floor(_round[num].lat * (_minLoc.lat - _border[num].lat)) / _round[num].lat;
+    min->lon = floor(_round[num].lon * (_minLoc.lon - _border[num].lon)) / _round[num].lon;
+    max->lat = ceil(_round[num].lat * (_maxLoc.lat + _border[num].lat)) / _round[num].lat;
+    max->lon = ceil(_round[num].lon * (_maxLoc.lon + _border[num].lon)) / _round[num].lon;
+}
+
 double zoom(ChartData chartData)
 {
     double borderLat = _maxLoc.lat - _minLoc.lat;
@@ -672,19 +680,28 @@ void initView()
     memcpy(&_origMinLoc, &_minLoc, sizeof(Locn));
     memcpy(&_origMaxLoc, &_maxLoc, sizeof(Locn));
 
-    _minLoc.lat = floor(_round[_currentChart].lat * (_minLoc.lat - _border[_currentChart].lat)) / _round[_currentChart].lat;
-    _minLoc.lon = floor(_round[_currentChart].lon * (_minLoc.lon - _border[_currentChart].lon)) / _round[_currentChart].lon;
-    _maxLoc.lat = ceil(_round[_currentChart].lat * (_maxLoc.lat + _border[_currentChart].lat)) / _round[_currentChart].lat;
-    _maxLoc.lon = ceil(_round[_currentChart].lon * (_maxLoc.lon + _border[_currentChart].lon)) / _round[_currentChart].lon;
+    Locn minSmall, maxSmall;
+    expandBorder(0, &minSmall, &maxSmall);
 
-    if (_minLoc.lat >= MinLatSmall && _minLoc.lon >= MinLonSmall && _maxLoc.lat <= MaxLatSmall && _maxLoc.lon <= MaxLonSmall && zoom(_chartSourceData[0]) < 0.9) {
+    Locn minMedium, maxMedium;
+    expandBorder(1, &minMedium, &maxMedium);
+
+    if (minSmall.lat >= MinLatSmall && minSmall.lon >= MinLonSmall && maxSmall.lat <= MaxLatSmall && maxSmall.lon <= MaxLonSmall && zoom(_chartSourceData[0]) < 0.9) {
         switchChart(0);
+        memcpy(&_minLoc, &minSmall, sizeof(Locn));
+        memcpy(&_maxLoc, &maxSmall, sizeof(Locn));
     }
-    else if (_minLoc.lat >= MinLatMedium && _minLoc.lon >= MinLonMedium && _maxLoc.lat <= MaxLatMedium && _maxLoc.lon <= MaxLonMedium && zoom(_chartSourceData[1]) < 0.65) {
+    else if (minMedium.lat >= MinLatMedium && minMedium.lon >= MinLonMedium && maxMedium.lat <= MaxLatMedium && maxMedium.lon <= MaxLonMedium && zoom(_chartSourceData[1]) < 0.65) {
         switchChart(1);
+        memcpy(&_minLoc, &minMedium, sizeof(Locn));
+        memcpy(&_maxLoc, &maxMedium, sizeof(Locn));
     }
     else {
         switchChart(2);
+        Locn minLarge, maxLarge;
+        expandBorder(2, &minLarge, &maxLarge);
+        memcpy(&_minLoc, &minLarge, sizeof(Locn));
+        memcpy(&_maxLoc, &maxLarge, sizeof(Locn));
     }
 
     // Position centre of map
