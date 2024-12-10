@@ -99,6 +99,7 @@ enum MENU_ITEMS {
 };
 
 // Prototypes
+void zoomView();
 void doUpdate();
 
 
@@ -715,6 +716,12 @@ void initView()
     else {
         zoomDirn = 0;
     }
+
+    // Find optimum zoom
+    while (zoomDirn != 0) {
+        zoomView();
+        doUpdate();
+    }
 }
 
 void zoomView()
@@ -874,13 +881,6 @@ void render()
     drawArea();
 #endif
 
-    // Find optimum zoom
-    while (zoomDirn != 0) {
-        //printf("More zoom - scale: %f\n", _chart.scale);
-        zoomView();
-        doUpdate();
-    }
-
     for (int i = 0; i < _aircraftCount; i++) {
         drawAircraft(i);
     }
@@ -1035,7 +1035,7 @@ void showChart()
     }
 
     GetLiveData();
-
+    switchChart(1);
     initView();
 
     bool redraw = true;
@@ -1053,7 +1053,7 @@ void showChart()
 
         switch (event.type) {
         case ALLEGRO_EVENT_TIMER:
-            doUpdate();
+            //doUpdate();
             redraw = true;
             break;
 
