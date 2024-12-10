@@ -8,7 +8,7 @@ while [ 1 ]
 do
   if [ ! -f /usr/local/bin/able-suppress.dat ]
   then
-    ./run.sh
+    ./run.sh >>/home/pi/able-live.log
   fi
 
   if [ -f /usr/local/bin/able-suppress.dat ]
