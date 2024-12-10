@@ -87,7 +87,7 @@ char prevCallsign[16];
 int prevAltitude = -1;
 int prevSpeed = -1;
 char prevLabel[128];
-bool pause = false;
+bool paused = false;
 
 enum MENU_ITEMS {
     MENU_NO_TAGS = 1,
@@ -980,10 +980,10 @@ bool doKeypress(ALLEGRO_EVENT* event, bool isDown)
 #ifdef DEBUG
     case ALLEGRO_KEY_SPACE:
         if (isDown) {
-            pause = true;
+            paused = true;
         }
         else {
-            pause = false;
+            paused = false;
         }
 #endif
         break;
@@ -1107,7 +1107,7 @@ void showChart()
         }
 
         time(&now);
-        if (now - lastFetch > 1 && !pause) {
+        if (now - lastFetch > 1 && !paused) {
             lastFetch = now;
             if (GetLiveData()) {
                 lastSuccess = now;
