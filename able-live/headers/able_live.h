@@ -28,7 +28,7 @@ const double MinLonLarge = -5.81;
 const double MaxLatLarge = 54.51;
 const double MaxLonLarge = 1.79;   // Area = 4.59 lat by 7.60 lon
 
-const int DefaultFPS = 15;
+const int DefaultFPS = 3;
 const double RadiansToDegrees = 180.0f / ALLEGRO_PI;
 
 const char Jets[] = "_AST_BE4_C25_C51_C52_C55_C56_C68_C75_CL3_CL6_CRJ_E13_E14_E35_E50_E55_EA5_F2T_F90_FA2_FA7_FA8_G28_GA5_GA6_GAL_GL5_GL7_GLE_GLF_H25_HDJ_LJ3_LJ7_PC2_PRM_";
