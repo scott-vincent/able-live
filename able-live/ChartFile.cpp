@@ -127,7 +127,7 @@ void loadSettings()
             }
             case 2:
             {
-                int items = sscanf(line, "%d,%d,%d", &val1, &val2, &val3, &val4);
+                int items = sscanf(line, "%d,%d,%d,%d", &val1, &val2, &val3, &val4);
                 if (items == 4) {
                     _settings.tags = val1;
                     _settings.ablesHideOthers = val2;

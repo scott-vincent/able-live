@@ -37,7 +37,7 @@ const char AircraftMilitaryTurboprop[] = "resources/images/military_turboprop.pn
 const char AircraftMilitaryHeli[] = "resources/images/military_heli.png";
 
 const int MaxAble = 14;
-const int MinScale = 75;
+const int MinScale = 5;
 const int MaxScale = 200;
 
 // Externals
@@ -60,6 +60,8 @@ int _displayHeight;
 int _winCheckDelay = 0;
 DrawData _chartSource[3];
 ChartData _chartSourceData[3];
+Locn _border[3];
+Locn _round[3];
 DrawData _chart;
 ChartData _chartData;
 int _currentChart = -1;
@@ -77,12 +79,15 @@ int _aircraftCount = 0;
 bool _haveAble = false;
 Locn _minLoc;
 Locn _maxLoc;
+Locn _origMinLoc;
+Locn _origMaxLoc;
 int zoomDirn = 0;
 Position zoomTarget;
 char prevCallsign[16];
 int prevAltitude = -1;
 int prevSpeed = -1;
 char prevLabel[128];
+bool pause = false;
 
 enum MENU_ITEMS {
     MENU_NO_TAGS = 1,
@@ -210,6 +215,21 @@ void initVars()
     _settings.keepBlackbusheZoomed = false;
 
     _aircraftCount = 0;
+
+    _border[0].lat = 0.004;
+    _border[0].lon = 0.007;
+    _round[0].lat = 0.2 / _border[0].lat;
+    _round[0].lon = 0.2 / _border[0].lon;
+
+    _border[1].lat = 0.008;
+    _border[1].lon = 0.014;
+    _round[1].lat = 0.4 / _border[1].lat;
+    _round[1].lon = 0.4 / _border[1].lon;
+
+    _border[2].lat = 0.03;
+    _border[2].lon = 0.05;
+    _round[2].lat = 0.5 / _border[2].lat;
+    _round[2].lon = 0.5 / _border[2].lon;
 }
 
 void cleanupTags()
@@ -631,26 +651,35 @@ void switchChart(int num)
     doUpdate();
 }
 
+double zoom(ChartData chartData)
+{
+    double borderLat = _maxLoc.lat - _minLoc.lat;
+    double borderLon = _maxLoc.lon - _minLoc.lon;
+    double chartLat = abs(chartData.lat[1] - chartData.lat[0]);
+    double chartLon = abs(chartData.lon[1] - chartData.lon[0]);
+
+    double zoom = borderLat / chartLat;
+    if (zoom < borderLon / chartLon) {
+        zoom = borderLon / chartLon;
+    }
+
+    return zoom;
+}
+
 void initView()
 {
-    double latBorder, lonBorder;
-    switch (_currentChart) {
-        case 0: latBorder = 0.004; lonBorder = 0.007; break;
-        case 1: latBorder = 0.008; lonBorder = 0.014; break;
-        default: latBorder = 0.03; lonBorder = 0.05; break;
-    }
+    memcpy(&_origMinLoc, &_minLoc, sizeof(Locn));
+    memcpy(&_origMaxLoc, &_maxLoc, sizeof(Locn));
 
-    _minLoc.lat -= latBorder;
-    _minLoc.lon -= lonBorder;
-    _maxLoc.lat += latBorder;
-    _maxLoc.lat += lonBorder;
+    _minLoc.lat = floor(_round[_currentChart].lat * (_minLoc.lat - _border[_currentChart].lat)) / _round[_currentChart].lat;
+    _minLoc.lon = floor(_round[_currentChart].lon * (_minLoc.lon - _border[_currentChart].lon)) / _round[_currentChart].lon;
+    _maxLoc.lat = ceil(_round[_currentChart].lat * (_maxLoc.lat + _border[_currentChart].lat)) / _round[_currentChart].lat;
+    _maxLoc.lon = ceil(_round[_currentChart].lon * (_maxLoc.lon + _border[_currentChart].lon)) / _round[_currentChart].lon;
 
-    printf("map: %f,%f  area: %f,%f  scale: %f\n", _chartData.lat[1] - _chartData.lat[0], _chartData.lon[0] - _chartData.lon[1], _maxLoc.lat - _minLoc.lat, _maxLoc.lon - _minLoc.lon, _chart.scale);
-
-    if (_minLoc.lat >= MinLatSmall && _minLoc.lon >= MinLonSmall && _maxLoc.lat <= MaxLatSmall && _maxLoc.lon <= MaxLonSmall) {
+    if (_minLoc.lat >= MinLatSmall && _minLoc.lon >= MinLonSmall && _maxLoc.lat <= MaxLatSmall && _maxLoc.lon <= MaxLonSmall && zoom(_chartSourceData[0]) < 0.9) {
         switchChart(0);
     }
-    else if (_minLoc.lat >= MinLatMedium && _minLoc.lon >= MinLonMedium && _maxLoc.lat <= MaxLatMedium && _maxLoc.lon <= MaxLonMedium) {
+    else if (_minLoc.lat >= MinLatMedium && _minLoc.lon >= MinLonMedium && _maxLoc.lat <= MaxLatMedium && _maxLoc.lon <= MaxLonMedium && zoom(_chartSourceData[1]) < 0.65) {
         switchChart(1);
     }
     else {
@@ -659,8 +688,8 @@ void initView()
 
     // Position centre of map
     Locn locCentre;
-    locCentre.lat = (_minLoc.lat + _maxLoc.lat) / 2;
-    locCentre.lon = (_minLoc.lon + _maxLoc.lon) / 2;
+    locCentre.lat = (_minLoc.lat + _maxLoc.lat) / 2.0;
+    locCentre.lon = (_minLoc.lon + _maxLoc.lon) / 2.0;
 
     Position centrePos;
     locationToChartPos(&locCentre, &centrePos);
@@ -678,15 +707,12 @@ void initView()
     locationToChartPos(&targetLoc, &zoomTarget);
 
     if (zoomTarget.x < zoomCurrent.x || zoomTarget.y < zoomCurrent.y) {
-        //printf("Zoom in - scale: %f\n", _chart.scale);
         zoomDirn = 1;
     }
     else if (zoomTarget.x > zoomCurrent.x && zoomTarget.y > zoomCurrent.y) {
-        //printf("Zoom out - scale: %f\n", _chart.scale);
         zoomDirn = -1;
     }
     else {
-        //printf("No zoom\n");
         zoomDirn = 0;
     }
 }
@@ -701,7 +727,7 @@ void zoomView()
     if (zoomDirn == 1) {
         if (zoomTarget.x > zoomCurrent.x && zoomTarget.y > zoomCurrent.y) {
             zoomDirn = 0;
-            _chart.scale++;
+            _chart.scale += 1;
         }
         else {
             newScale = _chart.scale - 1;
@@ -716,7 +742,7 @@ void zoomView()
     else if (zoomDirn == -1) {
         if (zoomTarget.x < zoomCurrent.x || zoomTarget.y < zoomCurrent.y) {
             zoomDirn = 0;
-            _chart.scale--;
+            _chart.scale -= 1;
         }
         else {
             newScale = _chart.scale + 1;
@@ -761,19 +787,9 @@ void drawArea()
     al_draw_line(x2, y2, x1, y2, colour, 3);
     al_draw_line(x1, y2, x1, y1, colour, 3);
 
-    double latBorder, lonBorder;
-    switch (_currentChart) {
-    case 0: latBorder = 0.004; lonBorder = 0.007; break;
-    case 1: latBorder = 0.008; lonBorder = 0.014; break;
-    default: latBorder = 0.03; lonBorder = 0.05; break;
-    }
-    Locn newMinLoc, newMaxLoc;
-    newMinLoc.lat = _minLoc.lat + latBorder;
-    newMinLoc.lon = _minLoc.lon + lonBorder;
-    newMaxLoc.lat = _maxLoc.lat - latBorder;
-    newMaxLoc.lon = _maxLoc.lon - lonBorder;
-    locationToDisplay(&newMinLoc, &x1, &y1);
-    locationToDisplay(&newMaxLoc, &x2, &y2);
+    locationToDisplay(&_origMinLoc, &x1, &y1);
+    locationToDisplay(&_origMaxLoc, &x2, &y2);
+
     al_draw_line(x1, y1, x2, y1, colour, 3);
     al_draw_line(x2, y1, x2, y2, colour, 3);
     al_draw_line(x2, y2, x1, y2, colour, 3);
@@ -961,6 +977,16 @@ bool doKeypress(ALLEGRO_EVENT* event, bool isDown)
     case ALLEGRO_KEY_ESCAPE:
         _quit = true;
         break;
+#ifdef DEBUG
+    case ALLEGRO_KEY_SPACE:
+        if (isDown) {
+            pause = true;
+        }
+        else {
+            pause = false;
+        }
+#endif
+        break;
     }
 
     return false;
@@ -1081,7 +1107,7 @@ void showChart()
         }
 
         time(&now);
-        if (now - lastFetch > 1) {
+        if (now - lastFetch > 1 && !pause) {
             lastFetch = now;
             if (GetLiveData()) {
                 lastSuccess = now;

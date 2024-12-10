@@ -216,7 +216,9 @@ void localMe()
 {
     putMe(51.32584, -0.83854);
     putMe(51.31723, -0.88315);
-    putMe(51.401, -1.32);
+    //putMe(51.401, -1.32);
+    //putMe(51.501, -1.82);
+    putMe(51.901, -0.88315);
 }
 
 void initMe()
@@ -363,10 +365,10 @@ bool GetLiveData()
     char* pos = strstr(_ableData, "\"acList\":");
     if (!pos) {
         printf("Unexpected response: %s\n", _ableData);
-        _minLoc.lat = 51.1;
-        _minLoc.lon = -4.4;
-        _maxLoc.lat = 52.4;
-        _maxLoc.lon = 0.8;
+        _minLoc.lat = BlackbusheLat - 0.05;
+        _minLoc.lon = BlackbusheLon - 0.16;
+        _maxLoc.lat = BlackbusheLat + 0.13;
+        _maxLoc.lon = BlackbusheLon + 0.37;
         return false;
     }
 

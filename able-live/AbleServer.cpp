@@ -146,7 +146,10 @@ void serverInit()
 
     fclose(inf);
 
-    if (ping(urlLocal)) {
+    if (*urlInternet == '\0') {
+        strcpy(_url, urlLocal);
+    }
+    else if (ping(urlLocal)) {
         printf("Found local PilotAware\n");
         strcpy(_url, urlLocal);
     }
