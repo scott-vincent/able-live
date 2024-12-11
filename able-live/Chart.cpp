@@ -211,7 +211,7 @@ void initVars()
     _settings.width = 1200;
     _settings.height = 800;
     _settings.framesPerSec = 0;
-    _settings.tags = 1;
+    _settings.tags = 2;
     _settings.addFlightradarData = true;
     _settings.southernEnglandOnly = true;
     _settings.excludeHighAlt = false;
