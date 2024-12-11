@@ -16,6 +16,7 @@ extern bool _serverQuit;
 
 // Variables
 char _url[256];
+bool _fr24Request = false;
 bool _ableRequest = false;
 bool _ableResponse = false;
 char* _ableData = 0;
@@ -184,7 +185,12 @@ bool doRequest()
         return false;
     }
 
-    curl_easy_setopt(_curl, CURLOPT_URL, _url);
+    if (_fr24Request) {
+        curl_easy_setopt(_curl, CURLOPT_URL, FR24_Url);
+    }
+    else {
+        curl_easy_setopt(_curl, CURLOPT_URL, _url);
+    }
 
     if (_ableData) {
         free(_ableData);

@@ -78,7 +78,7 @@ void saveSettings()
     }
 
     fprintf(outf, "%d,%d,%d,%d\n", _settings.x, _settings.y, _settings.width, _settings.height);
-    fprintf(outf, "%d,%d,%d,%d\n", _settings.tags, _settings.ablesHideOthers, _settings.excludeHighAlt, _settings.keepBlackbusheZoomed);
+    fprintf(outf, "%d,%d,%d,%d,%d\n", _settings.tags, _settings.addFlightradarData, _settings.southernEnglandOnly, _settings.excludeHighAlt, _settings.keepBlackbusheZoomed);
 
     fclose(outf);
 }
@@ -96,10 +96,7 @@ void loadSettings()
         int y;
         int width;
         int height;
-        int val1;
-        int val2;
-        int val3;
-        int val4;
+        int val1, val2, val3, val4, val5;
 
         *_settings.location = '\0';
 
@@ -127,12 +124,13 @@ void loadSettings()
             }
             case 2:
             {
-                int items = sscanf(line, "%d,%d,%d,%d", &val1, &val2, &val3, &val4);
-                if (items == 4) {
+                int items = sscanf(line, "%d,%d,%d,%d,%d", &val1, &val2, &val3, &val4, &val5);
+                if (items == 5) {
                     _settings.tags = val1;
-                    _settings.ablesHideOthers = val2;
-                    _settings.excludeHighAlt = val3;
-                    _settings.keepBlackbusheZoomed = val4;
+                    _settings.addFlightradarData = val2;
+                    _settings.southernEnglandOnly = val3,
+                    _settings.excludeHighAlt = val4;
+                    _settings.keepBlackbusheZoomed = val5;
                 }
                 break;
             }

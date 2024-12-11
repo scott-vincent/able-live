@@ -7,7 +7,7 @@
 #include <iostream>
 #include <thread>
 
-const char* versionString = "v1.0.1";
+const char* versionString = "v1.0.2";
 bool _quit = false;
 bool _serverQuit = false;
 char _moduleFilename[256];

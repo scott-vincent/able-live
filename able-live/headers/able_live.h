@@ -3,10 +3,11 @@
 #include <allegro5/allegro_image.h>
 
 // Comment out the following line when not debugging
-#define DEBUG
+//#define DEBUG
 
 // Constants
 const char AbleLiveUrls[] = "../../able-live.urls";
+const char FR24_Url[] = "https://raspi5.tail518e1b.ts.net/ablelivedata";
 const int MaxAircraft = 256;
 const char ImagesDir[] = "resources/images";
 const char FontsDir[] = "resources/fonts";
@@ -98,7 +99,8 @@ struct Settings {
     int framesPerSec;
     char location[256];
     int tags;
-    bool ablesHideOthers;
+    bool addFlightradarData;
+    bool southernEnglandOnly;
     bool excludeHighAlt;
     bool keepBlackbusheZoomed;
 };
@@ -111,6 +113,7 @@ struct CalibratedData {
 struct PosData {
     int id;
     char callsign[16];
+    char typeCode[8];
     ALLEGRO_BITMAP* bmp;
     Locn loc;
     int heading;

@@ -50,7 +50,6 @@ double DegreesToRadians = ALLEGRO_PI / 180.0f;
 ALLEGRO_FONT* _font = NULL;
 ALLEGRO_FONT* _font1 = NULL;
 ALLEGRO_FONT* _font2 = NULL;
-ALLEGRO_FONT* _font3 = NULL;
 ALLEGRO_DISPLAY* _display = NULL;
 ALLEGRO_TIMER* _timer = NULL;
 ALLEGRO_EVENT_QUEUE* _eventQueue = NULL;
@@ -93,7 +92,8 @@ enum MENU_ITEMS {
     MENU_NO_TAGS = 1,
     MENU_SIMPLE_TAGS,
     MENU_FULL_TAGS,
-    MENU_ABLES_HIDE_OTHERS,
+    MENU_ADD_FLIGHTRADAR_DATA,
+    MENU_SOUTHERN_ENGLAND_ONLY,
     MENU_EXCLUDE_HIGH_ALT,
     MENU_KEEP_BLACKBUSHE_ZOOMED
 };
@@ -158,8 +158,9 @@ ALLEGRO_MENU* createMenu()
     al_append_menu_item(menu, "No Tags", MENU_NO_TAGS, checkedState(_settings.tags == 0), NULL, NULL);
     al_append_menu_item(menu, "Simple Tags", MENU_SIMPLE_TAGS, checkedState(_settings.tags == 1), NULL, NULL);
     al_append_menu_item(menu, "Full Tags", MENU_FULL_TAGS, checkedState(_settings.tags == 2), NULL, NULL);
-    al_append_menu_item(menu, "ABLES Hide Others", MENU_ABLES_HIDE_OTHERS, checkedState(_settings.ablesHideOthers), NULL, NULL);
-    al_append_menu_item(menu, "Exclude > 6000ft", MENU_EXCLUDE_HIGH_ALT, checkedState(_settings.excludeHighAlt), NULL, NULL);
+    al_append_menu_item(menu, "Add Flightradar24 Data", MENU_ADD_FLIGHTRADAR_DATA, checkedState(_settings.addFlightradarData), NULL, NULL);
+    al_append_menu_item(menu, "Southern England Only", MENU_SOUTHERN_ENGLAND_ONLY, checkedState(_settings.southernEnglandOnly), NULL, NULL);
+    //al_append_menu_item(menu, "Exclude > 6000ft", MENU_EXCLUDE_HIGH_ALT, checkedState(_settings.excludeHighAlt), NULL, NULL);
     al_append_menu_item(menu, "Keep Blackbushe Zoomed", MENU_KEEP_BLACKBUSHE_ZOOMED, checkedState(_settings.keepBlackbusheZoomed), NULL, NULL);
 
     return menu;
@@ -211,7 +212,8 @@ void initVars()
     _settings.height = 800;
     _settings.framesPerSec = 0;
     _settings.tags = 1;
-    _settings.ablesHideOthers = false;
+    _settings.addFlightradarData = true;
+    _settings.southernEnglandOnly = true;
     _settings.excludeHighAlt = false;
     _settings.keepBlackbusheZoomed = false;
 
@@ -219,16 +221,16 @@ void initVars()
 
     _border[0].lat = 0.004;
     _border[0].lon = 0.007;
-    _round[0].lat = 0.2 / _border[0].lat;
-    _round[0].lon = 0.2 / _border[0].lon;
+    _round[0].lat = 0.4 / _border[0].lat;
+    _round[0].lon = 0.4 / _border[0].lon;
 
     _border[1].lat = 0.008;
     _border[1].lon = 0.014;
     _round[1].lat = 0.4 / _border[1].lat;
     _round[1].lon = 0.4 / _border[1].lon;
 
-    _border[2].lat = 0.03;
-    _border[2].lon = 0.05;
+    _border[2].lat = 0.010;
+    _border[2].lon = 0.017;
     _round[2].lat = 0.5 / _border[2].lat;
     _round[2].lon = 0.5 / _border[2].lon;
 }
@@ -263,8 +265,13 @@ void actionMenuItem(MENU_ITEMS menuItem)
         cleanupTags();
         break;
 
-    case MENU_ABLES_HIDE_OTHERS:
-        _settings.ablesHideOthers = !_settings.ablesHideOthers;
+    case MENU_ADD_FLIGHTRADAR_DATA:
+        _settings.addFlightradarData = !_settings.addFlightradarData;
+        saveSettings();
+        break;
+
+    case MENU_SOUTHERN_ENGLAND_ONLY:
+        _settings.southernEnglandOnly = !_settings.southernEnglandOnly;
         saveSettings();
         break;
 
@@ -349,15 +356,11 @@ bool init()
         return false;
     }
 
-    if (!(_font1 = loadFont("arial.ttf", 44))) {
+    if (!(_font1 = loadFont("arial.ttf", 10))) {
         return false;
     }
 
-    if (!(_font2 = loadFont("arial.ttf", 20))) {
-        return false;
-    }
-
-    if (!(_font3 = loadFont("arialbd.ttf", 14))) {
+    if (!(_font2 = loadFont("arialbd.ttf", 14))) {
         return false;
     }
 
@@ -496,10 +499,6 @@ void cleanup()
 
     if (_font2) {
         al_destroy_font(_font2);
-    }
-
-    if (_font3) {
-        al_destroy_font(_font3);
     }
 
     if (_display) {
@@ -648,7 +647,7 @@ void switchChart(int num)
     memcpy(&_chart, &_chartSource[num], sizeof(_chart));
     memcpy(&_chartData, &_chartSourceData[num], sizeof(_chartData));
 
-    _chart.scale = MinScale;
+    _chart.scale = 100;
     doUpdate();
 }
 
@@ -660,12 +659,12 @@ void expandBorder(int num, Locn* min, Locn* max)
     max->lon = ceil(_round[num].lon * (_maxLoc.lon + _border[num].lon)) / _round[num].lon;
 }
 
-double zoom(ChartData chartData)
+double zoom(ChartData* chartData, Locn* minLoc, Locn* maxLoc)
 {
-    double borderLat = _maxLoc.lat - _minLoc.lat;
-    double borderLon = _maxLoc.lon - _minLoc.lon;
-    double chartLat = abs(chartData.lat[1] - chartData.lat[0]);
-    double chartLon = abs(chartData.lon[1] - chartData.lon[0]);
+    double borderLat = maxLoc->lat - minLoc->lat;
+    double borderLon = maxLoc->lon - minLoc->lon;
+    double chartLat = abs(chartData->lat[1] - chartData->lat[0]);
+    double chartLon = abs(chartData->lon[1] - chartData->lon[0]);
 
     double zoom = borderLat / chartLat;
     if (zoom < borderLon / chartLon) {
@@ -682,17 +681,21 @@ void initView()
 
     Locn minSmall, maxSmall;
     expandBorder(0, &minSmall, &maxSmall);
+    double smallZoom = zoom(&_chartSourceData[0], &minSmall, &maxSmall);
 
     Locn minMedium, maxMedium;
     expandBorder(1, &minMedium, &maxMedium);
+    double mediumZoom = zoom(&_chartSourceData[1], &minMedium, &maxMedium);
 
-    if (minSmall.lat >= MinLatSmall && minSmall.lon >= MinLonSmall && maxSmall.lat <= MaxLatSmall && maxSmall.lon <= MaxLonSmall && zoom(_chartSourceData[0]) < 0.9) {
+    if (minSmall.lat >= MinLatSmall && minSmall.lon >= MinLonSmall && maxSmall.lat <= MaxLatSmall && maxSmall.lon <= MaxLonSmall && smallZoom < 0.65) {
         switchChart(0);
+        //printf("border left: %f, right: %f, top: %f, bottom: %f\n", minSmall.lon - _minLoc.lon, maxSmall.lon - _maxLoc.lon, maxSmall.lat - _maxLoc.lat, minSmall.lat - _minLoc.lat);
         memcpy(&_minLoc, &minSmall, sizeof(Locn));
         memcpy(&_maxLoc, &maxSmall, sizeof(Locn));
     }
-    else if (minMedium.lat >= MinLatMedium && minMedium.lon >= MinLonMedium && maxMedium.lat <= MaxLatMedium && maxMedium.lon <= MaxLonMedium && zoom(_chartSourceData[1]) < 0.65) {
+    else if (minMedium.lat >= MinLatMedium && minMedium.lon >= MinLonMedium && maxMedium.lat <= MaxLatMedium && maxMedium.lon <= MaxLonMedium && mediumZoom < 0.81) {
         switchChart(1);
+        //printf("border left: %f, right: %f, top: %f, bottom: %f\n", minMedium.lon - _minLoc.lon, maxMedium.lon - _maxLoc.lon, maxMedium.lat - _maxLoc.lat, minMedium.lat - _minLoc.lat);
         memcpy(&_minLoc, &minMedium, sizeof(Locn));
         memcpy(&_maxLoc, &maxMedium, sizeof(Locn));
     }
@@ -700,6 +703,7 @@ void initView()
         switchChart(2);
         Locn minLarge, maxLarge;
         expandBorder(2, &minLarge, &maxLarge);
+        //printf("border left: %f, right: %f, top: %f, bottom: %f\n", minLarge.lon - _minLoc.lon, maxLarge.lon - _maxLoc.lon, maxLarge.lat - _maxLoc.lat, minLarge.lat - _minLoc.lat);
         memcpy(&_minLoc, &minLarge, sizeof(Locn));
         memcpy(&_maxLoc, &maxLarge, sizeof(Locn));
     }
@@ -752,14 +756,17 @@ void zoomView()
         if (zoomTarget.x > zoomCurrent.x && zoomTarget.y > zoomCurrent.y) {
             zoomDirn = 0;
             _chart.scale += 1;
+            //printf("Zoom finished - scale: %f\n", _chart.scale);
         }
         else {
             newScale = _chart.scale - 1;
             if (newScale < MinScale) {
+                //printf("Zoom min - scale: %f\n", _chart.scale);
                 zoomDirn = 0;
             }
             else {
                 _chart.scale = newScale;
+                //printf("Zoom in - scale: %f\n", _chart.scale);
             }
         }
     }
@@ -767,14 +774,17 @@ void zoomView()
         if (zoomTarget.x < zoomCurrent.x || zoomTarget.y < zoomCurrent.y) {
             zoomDirn = 0;
             _chart.scale -= 1;
+            //printf("Zoom finished - scale: %f\n", _chart.scale);
         }
         else {
             newScale = _chart.scale + 1;
             if (newScale > MaxScale) {
+                //printf("Zoom max - scale: %f\n", _chart.scale);
                 zoomDirn = 0;
             }
             else {
                 _chart.scale = newScale;
+                //printf("Zoom out - scale: %f\n", _chart.scale);
             }
         }
     }
@@ -794,7 +804,7 @@ void createSpeedText(int speed)
     al_set_target_bitmap(_speedText.bmp);
     al_clear_to_color(al_map_rgb(0x83, 0x83, 0x99));
 
-    al_draw_text(_font3, al_map_rgb(0xf1, 0xf1, 0xf1), 0, 0, 0, text);
+    al_draw_text(_font2, al_map_rgb(0xf1, 0xf1, 0xf1), 0, 0, 0, text);
     al_set_target_backbuffer(_display);
 }
 
@@ -820,12 +830,43 @@ void drawArea()
     al_draw_line(x1, y2, x1, y1, colour, 3);
 }
 
-void drawAircraft(int idx)
+void createTag(PosData* posData)
 {
-    if (_settings.ablesHideOthers && !_aircraftData[_set][idx].isAble) {
-        return;
+    ALLEGRO_COLOR background = al_map_rgb(0x83, 0x83, 0x99);
+    ALLEGRO_COLOR colour = al_map_rgb(0xf1, 0xf1, 0xf1);
+
+    posData->label.width = al_get_text_width(_font1, posData->callsign) + 2;
+
+    char fullText[16];
+    if (_settings.tags == 1) {
+        posData->label.height = 22;
+    }
+    else {
+        sprintf(fullText, "%d  %d", posData->speed, posData->altitude);
+        int width = al_get_text_width(_font1, fullText) + 2;
+        if (posData->label.width < width) {
+            posData->label.width = width;
+        }
+        posData->label.height = 32;
     }
 
+    posData->label.bmp = al_create_bitmap(posData->label.width, posData->label.height);
+
+    al_set_target_bitmap(posData->label.bmp);
+    al_clear_to_color(background);
+
+    al_draw_text(_font1, colour, 1, 0, 0, posData->callsign);
+    al_draw_text(_font1, colour, 1, 10, 0, posData->typeCode);
+
+    if (_settings.tags == 2) {
+        al_draw_text(_font1, colour, 1, 20, 0, fullText);
+    }
+
+    al_set_target_backbuffer(_display);
+}
+
+void drawAircraft(int idx)
+{
     if (_settings.excludeHighAlt && _aircraftData[_set][idx].altitude > 6000) {
         return;
     }
@@ -838,6 +879,16 @@ void drawAircraft(int idx)
         return;
     }
 
+    if (_settings.tags > 0) {
+        if (_aircraftData[_set][idx].label.bmp == NULL) {
+            createTag(&_aircraftData[_set][idx]);
+        }
+
+        // Draw tag
+        al_draw_bitmap(_aircraftData[_set][idx].label.bmp, x - _aircraftData[_set][idx].label.width / 2, y + 20, 0);
+    }
+
+    // Draw aircraft
     double scale = 0.18;
     al_draw_scaled_rotated_bitmap(_aircraftData[_set][idx].bmp, _aircraft.x, _aircraft.y, x, y, scale, scale, _aircraftData[_set][idx].heading * DegreesToRadians, 0);
 }
@@ -1124,10 +1175,11 @@ void showChart()
         }
 
         time(&now);
-        if (now - lastFetch > 1 && !paused) {
+        if (now - lastFetch > 0 && !paused) {
             lastFetch = now;
             if (GetLiveData()) {
                 lastSuccess = now;
+                _settings.excludeHighAlt = _haveAble;
                 initView();
             }
             else if (now - lastSuccess > 30) {

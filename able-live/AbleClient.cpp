@@ -10,6 +10,7 @@
 
 // Externals
 extern bool _serverQuit;
+extern bool _fr24Request;
 extern bool _ableRequest;
 extern bool _ableResponse;
 extern char* _ableData;
@@ -25,6 +26,7 @@ extern int _aircraftCount;
 // Variables
 Locn minAbleLoc;
 Locn maxAbleLoc;
+bool haveAbleNum[16];
 
 PosData me;
 Locn meLoc[256];
@@ -91,7 +93,7 @@ void fixCallsign(char* callsign)
         return;
     }
 
-    if (callsign[2] = 'B') {
+    if (callsign[2] == 'B') {
         if (strcmp(&callsign[3], "CIR") == 0) {
             strcpy(callsign, "ABLE03");
         }
@@ -108,7 +110,7 @@ void fixCallsign(char* callsign)
             strcpy(callsign, "ABLE12");
         }
     }
-    else if (callsign[2] = 'I') {
+    else if (callsign[2] == 'I') {
         if (strcmp(&callsign[3], "DOO") == 0) {
             strcpy(callsign, "ABLE05");
         }
@@ -133,7 +135,7 @@ void fixCallsign(char* callsign)
     }
 }
 
-ALLEGRO_BITMAP* getBmp(char* typeCode, char* callsign)
+ALLEGRO_BITMAP* getBmp(char* callsign, char* typeCode)
 {
     if (strncmp(callsign, "ABLE", 4) == 0) {
         return _aircraft.Able;
@@ -216,16 +218,15 @@ void localMe()
 {
     putMe(51.32584, -0.83854);
     putMe(51.31723, -0.88315);
-    //putMe(51.401, -1.32);
-    //putMe(51.501, -1.82);
-    putMe(51.901, -0.88315);
+    putMe(51.401, -1.32);
+    putMe(51.501, -1.82);
 }
 
 void initMe()
 {
     meCount = 0;
 
-    localMe();
+    circuitMe();
 
     mePos = 0;
     me.loc.lat = meLoc[mePos].lat;
@@ -242,7 +243,7 @@ bool addMe()
     }
 
     me.id = 12345;
-    strcpy(me.callsign, "ABLE14");
+    strcpy(me.callsign, "ABLE15");
     me.bmp = _aircraft.Able;
     me.altitude = 123;
     me.speed = 123;
@@ -285,6 +286,37 @@ bool addMe()
     return true;
 }
 
+bool addFr24(char *pos, PosData* posData)
+{
+    int num;
+
+    int count = sscanf(pos, "%d,%lf,%lf,%d,%d,%d", &num, &posData->loc.lat, &posData->loc.lon, &posData->heading, &posData->altitude, &posData->speed);
+
+    if (count != 6) {
+        printf("addFr24: Bad data -> %s\n", pos);
+        return false;
+    }
+
+    if (haveAbleNum[num - 1]) {
+        // Already have that Able
+        printf("addFr24: Already have ABLE%02d\n", num);
+        return false;
+    }
+
+    if (posData->loc.lat > 52.22) {
+        printf("addFr24: Excluding ABLE%02d (not in Southern England)\n", num);
+        return false;
+    }
+
+    posData->id = -1;
+    sprintf(posData->callsign, "ABLE%02d", num);
+    posData->bmp = _aircraft.Able;
+    posData->label.bmp = NULL;
+
+    printf("addFr24: Added %s at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
+    return true;
+}
+
 void initArea()
 {
     // Centre on Blackbushe
@@ -294,10 +326,10 @@ void initArea()
     _maxLoc.lon = BlackbusheLon;
 
     // Blackbushe circuits
-    minAbleLoc.lat = 51.294;
-    minAbleLoc.lon = -0.92;
+    minAbleLoc.lat = 51.298;
+    minAbleLoc.lon = -0.9;
     maxAbleLoc.lat = 51.334;
-    maxAbleLoc.lon = -0.77;
+    maxAbleLoc.lon = -0.79;
 
     if (_settings.keepBlackbusheZoomed) {
         _minLoc.lat = minAbleLoc.lat;
@@ -312,6 +344,9 @@ void updateArea()
     if (strncmp(_aircraftData[_set][_aircraftCount].callsign, "ABLE", 4) == 0) {
         _aircraftData[_set][_aircraftCount].isAble = true;
         _haveAble = true;
+
+        int num = atoi(&_aircraftData[_set][_aircraftCount].callsign[4]);
+        haveAbleNum[num - 1] = true;
     }
     else {
         _aircraftData[_set][_aircraftCount].isAble = false;
@@ -352,6 +387,24 @@ bool GetLiveData()
     if (_ableRequest || _ableResponse)
         return true;
 
+    char fr24Data[1024];
+    *fr24Data = '\0';
+
+    if (_settings.addFlightradarData) {
+        _fr24Request = true;
+        _ableRequest = true;
+
+        while (!_ableResponse) {
+            al_rest(0.02);
+            if (_serverQuit) {
+                return false;
+            }
+        }
+        _ableResponse = false;
+        strcpy(fr24Data, _ableData);
+    }
+
+    _fr24Request = false;
     _ableRequest = true;
 
     while (!_ableResponse) {
@@ -378,9 +431,12 @@ bool GetLiveData()
     _set = 1 - _set;
     _aircraftCount = 0;
     _haveAble = false;
-    initArea();
 
-    char typeCode[16];
+    for (int i = 0; i < 16; i++) {
+        haveAbleNum[i] = false;
+    }
+
+    initArea();
 
     time_t now;
     time(&now);
@@ -392,7 +448,7 @@ bool GetLiveData()
         }
         _aircraftData[_set][_aircraftCount].id = jsonNum(pos);
 
-        pos = strstr(pos, "\"Alt\":");
+        pos = strstr(pos, "\"GAlt\":");
         if (!pos) {
             break;
         }
@@ -443,7 +499,8 @@ bool GetLiveData()
         if (!pos) {
             break;
         }
-        strcpy(typeCode, jsonStr(pos));
+        strncpy(_aircraftData[_set][_aircraftCount].typeCode, jsonStr(pos), 7);
+        _aircraftData[_set][_aircraftCount].typeCode[7] = '\0';
 
         _aircraftData[_set][_aircraftCount].label.bmp = NULL;
 
@@ -452,6 +509,7 @@ bool GetLiveData()
             if (_aircraftData[_set][_aircraftCount].id == _aircraftData[oldSet][i].id) {
                 found = true;
                 strcpy(_aircraftData[_set][_aircraftCount].callsign, _aircraftData[oldSet][i].callsign);
+                strcpy(_aircraftData[_set][_aircraftCount].typeCode, _aircraftData[oldSet][i].typeCode);
                 _aircraftData[_set][_aircraftCount].bmp = _aircraftData[oldSet][i].bmp;
                 _aircraftData[_set][_aircraftCount].isAble = _aircraftData[oldSet][i].isAble;
 
@@ -466,8 +524,8 @@ bool GetLiveData()
 
                     if (wantBmp) {
                         // Move label to new
-                        printf("keep tag: %s\n", _aircraftData[oldSet][i].callsign);
-                        _aircraftData[_set][_aircraftCount].label.bmp = _aircraftData[oldSet][i].label.bmp;
+                        //printf("keep tag: %s\n", _aircraftData[oldSet][i].callsign);
+                        memcpy(&_aircraftData[_set][_aircraftCount].label, &_aircraftData[oldSet][i].label, sizeof(DrawData));
                         _aircraftData[oldSet][i].label.bmp = NULL;
                     }
                 }
@@ -477,23 +535,36 @@ bool GetLiveData()
 
         if (!found) {
             fixCallsign(_aircraftData[_set][_aircraftCount].callsign);
-            _aircraftData[_set][_aircraftCount].bmp = getBmp(typeCode, _aircraftData[_set][_aircraftCount].callsign);
+            _aircraftData[_set][_aircraftCount].bmp = getBmp(_aircraftData[_set][_aircraftCount].callsign, _aircraftData[_set][_aircraftCount].typeCode);
         }
 
         updateArea();
         _aircraftCount++;
     }
 
+#ifdef DEBUG
     if (addMe()) {
         memcpy(&_aircraftData[_set][_aircraftCount], &me, sizeof(PosData));
         updateArea();
         _aircraftCount++;
     }
+#endif
+
+    // Add in FlightRadar data but only if Able num is completely missing
+    pos = strchr(fr24Data, '#');
+    while (pos) {
+        pos++;
+        if (addFr24(pos, &_aircraftData[_set][_aircraftCount])) {
+            updateArea();
+            _aircraftCount++;
+        }
+        pos = strchr(pos, '#');
+    }
 
     // Cleanup old labels
     for (int i = 0; i < oldCount; i++) {
         if (_aircraftData[oldSet][i].label.bmp) {
-            printf("remove tag: %s\n", _aircraftData[oldSet][i].callsign);
+            //printf("remove tag: %s\n", _aircraftData[oldSet][i].callsign);
             cleanupBitmap(_aircraftData[oldSet][i].label.bmp);
         }
     }
