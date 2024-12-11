@@ -424,14 +424,14 @@ bool init()
 
     // Position window
     al_set_window_position(_display, _settings.x, _settings.y);
+#else
+    al_inhibit_screensaver(true);
+    al_hide_mouse_cursor(_display);
+    _mouseHidden = true;
 #endif
 
     _displayWidth = al_get_display_width(_display);
     _displayHeight = al_get_display_height(_display);
-
-    al_inhibit_screensaver(true);
-    al_hide_mouse_cursor(_display);
-    _mouseHidden = true;
 
     al_register_event_source(_eventQueue, al_get_keyboard_event_source());
     al_register_event_source(_eventQueue, al_get_mouse_event_source());
