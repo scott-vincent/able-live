@@ -1,7 +1,7 @@
 .git
 .vs
 packages
-**/able-live.settings
+**/able-live.settingsx
 **/x64
 **/debug
 **/Debug
