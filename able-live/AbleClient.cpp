@@ -290,21 +290,22 @@ bool addFr24(char *pos, PosData* posData)
 {
     int num;
 
-    int count = sscanf(pos, "%d,%lf,%lf,%d,%d,%d", &num, &posData->loc.lat, &posData->loc.lon, &posData->heading, &posData->altitude, &posData->speed);
+    int count = sscanf(pos, "%d,%7s,%lf,%lf,%d,%d,%d", &num, posData->typeCode, &posData->loc.lat, &posData->loc.lon, &posData->heading, &posData->altitude, &posData->speed);
+    posData->typeCode[7] = '\0';
 
-    if (count != 6) {
+    if (count != 7) {
         printf("addFr24: Bad data -> %s\n", pos);
         return false;
     }
 
     if (haveAbleNum[num - 1]) {
         // Already have that Able
-        printf("addFr24: Already have ABLE%02d\n", num);
+        //printf("addFr24: Already have ABLE%02d\n", num);
         return false;
     }
 
     if (posData->loc.lat > 52.22) {
-        printf("addFr24: Excluding ABLE%02d (not in Southern England)\n", num);
+        //printf("addFr24: Excluding ABLE%02d (not in Southern England)\n", num);
         return false;
     }
 
@@ -313,7 +314,7 @@ bool addFr24(char *pos, PosData* posData)
     posData->bmp = _aircraft.Able;
     posData->label.bmp = NULL;
 
-    printf("addFr24: Added %s at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
+    //printf("addFr24: Added %s at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
     return true;
 }
 
