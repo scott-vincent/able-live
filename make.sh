@@ -1,5 +1,3 @@
-echo able-stop
-able-stop
 echo Building able-live
 cd able-live
 g++ -o able-live -I . -I headers \
@@ -11,6 +9,4 @@ g++ -o able-live -I . -I headers \
     ChartFile.cpp \
     -lpthread -lcurl -lallegro -lallegro_primitives -lallegro_image -lallegro_font -lallegro_ttf -lallegro_dialog || exit
 strip able-live
-echo able-restart
-able-restart
 echo Done
