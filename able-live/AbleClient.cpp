@@ -314,7 +314,7 @@ bool addFr24(char *pos, PosData* posData)
     posData->bmp = _aircraft.Able;
     posData->label.bmp = NULL;
 
-    //printf("addFr24: Added %s at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
+    printf("addFr24: Added %s (%s) at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->typeCode, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
     return true;
 }
 
@@ -507,16 +507,19 @@ bool GetLiveData()
 
         bool found = false;
         for (int i = 0; i < oldCount; i++) {
-            if (_aircraftData[_set][_aircraftCount].id == _aircraftData[oldSet][i].id) {
+            if (_aircraftData[_set][_aircraftCount].id == _aircraftData[oldSet][i].id && _aircraftData[_set][_aircraftCount].id != -1) {
                 found = true;
                 strcpy(_aircraftData[_set][_aircraftCount].callsign, _aircraftData[oldSet][i].callsign);
-                strcpy(_aircraftData[_set][_aircraftCount].typeCode, _aircraftData[oldSet][i].typeCode);
                 _aircraftData[_set][_aircraftCount].bmp = _aircraftData[oldSet][i].bmp;
                 _aircraftData[_set][_aircraftCount].isAble = _aircraftData[oldSet][i].isAble;
 
                 if (_settings.tags != 0 && _aircraftData[oldSet][i].label.bmp) {
                     bool wantBmp = true;
-                    if (_settings.tags == 2 && _aircraftData[_set][_aircraftCount].speed != _aircraftData[oldSet][i].speed) {
+                    if (strcmp(_aircraftData[_set][_aircraftCount].typeCode, _aircraftData[oldSet][i].typeCode) != 0) {
+                        printf("Model code for %s has changed: %s -> %s\n", _aircraftData[_set][_aircraftCount].callsign, _aircraftData[oldSet][i].typeCode, _aircraftData[_set][_aircraftCount].typeCode);
+                        wantBmp = false;
+                    }
+                    else if (_settings.tags == 2 && _aircraftData[_set][_aircraftCount].speed != _aircraftData[oldSet][i].speed) {
                         wantBmp = false;
                     }
                     else if (_settings.tags == 2 && _aircraftData[_set][_aircraftCount].altitude != _aircraftData[oldSet][i].altitude) {

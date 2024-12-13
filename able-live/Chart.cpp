@@ -4,6 +4,7 @@
 #else
 #include <math.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #endif
 #include <iostream>
 #include <allegro5/allegro.h>
@@ -1084,6 +1085,31 @@ bool doMouseButton(ALLEGRO_EVENT* event, bool isPress)
     return false;
 }
 
+int getMillis()
+{
+#ifdef _WINDOWS
+    SYSTEMTIME now;
+    GetSystemTime(&now);
+    return now.wSecond * 1000 + now.wMilliseconds;
+#else
+    struct tm now;
+    gettimeofday(&now, NULL);
+    return (now.tv_sec % 60) * 1000 + now.tv_usec / 1000;
+#endif
+}
+
+int milliDiff(int millis1, int millis2)
+{
+    if (millis1 < millis2) {
+        if (millis1 == 0) {
+            return 60000;
+        }
+        return millis2 - millis1;
+    }
+
+    return (millis2 + 60000) - millis1;
+}
+
 ///
 /// main
 ///
@@ -1113,6 +1139,7 @@ void showChart()
 
     time_t now;
     time_t lastFetch = 0;
+    int lastMillis = 0;
     time_t lastSuccess;
     time(&lastSuccess);
 
@@ -1174,8 +1201,12 @@ void showChart()
             redraw = false;
         }
 
+        struct tm timeNow;
         time(&now);
+        int millisNow = getMillis();
         if (now - lastFetch > 0 && !paused) {
+            printf("Elapsed millis = %d\n", milliDiff(lastMillis, millisNow));
+            lastMillis = millisNow;
             lastFetch = now;
             if (GetLiveData()) {
                 lastSuccess = now;
