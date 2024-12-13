@@ -1,0 +1,16 @@
+usage="Usage: $0 [enable|disable]"
+
+local="/dev/shm/pilotaware_data"
+path="/pilotaware_data"
+
+if [ "$1" = enable ]
+then
+    sudo tailscale funnel --set-path $path -bg "$local"
+elif [ "$1" = disable ]
+then
+    sudo tailscale funnel --set-path $path -bg "$local" off
+    tailscale serve status
+else
+    echo "$usage"
+    exit
+fi
