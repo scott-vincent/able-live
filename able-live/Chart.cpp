@@ -1094,7 +1094,7 @@ int getMillis()
 #else
     struct tm now;
     gettimeofday(&now, NULL);
-    return (now.tv_sec % 60) * 1000 + now.tv_usec / 1000;
+    return (now.tm_sec % 60) * 1000 + now.tm_usec / 1000;
 #endif
 }
 
