@@ -5,6 +5,10 @@ path="/pilotaware_data"
 
 if [ "$1" = enable ]
 then
+    if [ ! -f $local ]
+    then
+        >$local
+    fi
     sudo tailscale funnel --set-path $path -bg "$local"
 elif [ "$1" = disable ]
 then
