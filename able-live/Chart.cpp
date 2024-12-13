@@ -1085,29 +1085,29 @@ bool doMouseButton(ALLEGRO_EVENT* event, bool isPress)
     return false;
 }
 
-int getMillis()
+long getMillis()
 {
 #ifdef _WINDOWS
     SYSTEMTIME now;
     GetSystemTime(&now);
-    return now.wSecond * 1000 + now.wMilliseconds;
+    return now.wHour * 3600000 + now.wMinute * 60000 + now.wSecond * 1000 + now.wMilliseconds;
 #else
     struct timeval now;
     gettimeofday(&now, NULL);
-    return (now.tv_sec % 60) * 1000 + now.tv_usec / 1000;
+    return (now.tv_sec % 86400) * 1000 + now.tv_usec / 1000;
 #endif
 }
 
-int milliDiff(int millis1, int millis2)
+long milliDiff(int millis1, int millis2)
 {
     if (millis1 < millis2) {
         if (millis1 == 0) {
-            return 60000;
+            return 86400000;
         }
         return millis2 - millis1;
     }
 
-    return (millis2 + 60000) - millis1;
+    return (millis2 + 86400000) - millis1;
 }
 
 ///
@@ -1137,11 +1137,9 @@ void showChart()
 
     al_start_timer(_timer);
 
-    time_t now;
-    time_t lastFetch = 0;
-    int lastMillis = 0;
-    time_t lastSuccess;
-    time(&lastSuccess);
+    long now;
+    long lastFetch = 0;
+    long lastSuccess = getMillis();
 
     while (!_quit && !_serverQuit) {
         al_wait_for_event(_eventQueue, &event);
@@ -1201,19 +1199,16 @@ void showChart()
             redraw = false;
         }
 
-        struct tm timeNow;
-        time(&now);
-        int millisNow = getMillis();
-        if (now - lastFetch > 0 && !paused) {
-            printf("Elapsed millis = %d\n", milliDiff(lastMillis, millisNow));
-            lastMillis = millisNow;
+        long now = getMillis();
+        if (milliDiff(lastFetch, now) > 1200 && !paused) {
+            printf("Elapsed millis = %d\n", milliDiff(lastFetch, now));
             lastFetch = now;
             if (GetLiveData()) {
                 lastSuccess = now;
                 _settings.excludeHighAlt = _haveAble;
                 initView();
             }
-            else if (now - lastSuccess > 30) {
+            else if (milliDiff(lastSuccess, now) > 30000) {
                 cleanupTags();
                 _aircraftCount = 0;
             }
