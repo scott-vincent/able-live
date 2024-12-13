@@ -1201,7 +1201,6 @@ void showChart()
 
         long now = getMillis();
         if (milliDiff(lastFetch, now) > 1200 && !paused) {
-            printf("Elapsed millis = %d\n", milliDiff(lastFetch, now));
             lastFetch = now;
             if (GetLiveData()) {
                 lastSuccess = now;
