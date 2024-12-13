@@ -1092,9 +1092,9 @@ int getMillis()
     GetSystemTime(&now);
     return now.wSecond * 1000 + now.wMilliseconds;
 #else
-    struct tm now;
+    struct timeval now;
     gettimeofday(&now, NULL);
-    return (now.tm_sec % 60) * 1000 + now.tm_usec / 1000;
+    return (now.tv_sec % 60) * 1000 + now.tv_usec / 1000;
 #endif
 }
 
