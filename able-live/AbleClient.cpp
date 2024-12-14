@@ -312,11 +312,11 @@ bool addFr24(char *pos, PosData* posData)
         printf("addFr24: Bad data (no lat): %s\n", pos);
         return false;
     }
-    pos++;
-
     int len = pos - startPos;
+
     strncpy(posData->typeCode, startPos, len);
     posData->typeCode[len] = '\0';
+    pos++;
 
     int count = sscanf(pos, "%lf,%lf,%d,%d,%d",  &posData->loc.lat, &posData->loc.lon, &posData->heading, &posData->altitude, &posData->speed);
     if (count != 5) {
