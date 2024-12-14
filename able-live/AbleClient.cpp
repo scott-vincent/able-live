@@ -512,11 +512,14 @@ bool GetLiveData()
         }
         _aircraftData[_aircraftCount].id = jsonNum(pos);
 
-        pos = strstr(pos, "\"GAlt\":");
+        pos = strstr(pos, "\"Alt\":");
         if (!pos) {
             break;
         }
         _aircraftData[_aircraftCount].altitude = jsonNum(pos);
+        if (_aircraftData[_aircraftCount].altitude < 100) {
+            _aircraftData[_aircraftCount].altitude = 0;
+        }
 
         pos = strstr(pos, "\"Call\":");
         if (!pos) {
