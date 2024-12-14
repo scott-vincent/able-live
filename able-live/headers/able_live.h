@@ -9,7 +9,7 @@
 #ifdef _WINDOWS
 const char WriteDataFile[] = "pilotaware_data";
 #else
-const char WriteDataFile[] = "/dev/shm/pilotaware_data";    // Send PilotAware data to AbleDisplay
+const char WriteDataFile[] = "/tmp/pilotaware_data";    // Send PilotAware data to AbleDisplay
 #endif
 const char PilotAware_Url[] = "../../pilotaware.uri";       // Fetch PilotAware data from ognpaw
 const char AbleDisplay_Url[] = "../../able-display.uri";    // Fetch FR24 data from AbleDisplay
