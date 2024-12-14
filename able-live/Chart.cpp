@@ -73,14 +73,14 @@ DrawData _speedText;
 Settings _settings;
 ALLEGRO_MOUSE_STATE _mouse;
 bool _mouseHidden = false;
-PosData _aircraftData[2][MaxAircraft];
-int _set = 0;
+PosData _aircraftData[MaxAircraft];
 int _aircraftCount = 0;
 bool _haveAble = false;
 Locn _minLoc;
 Locn _maxLoc;
 Locn _origMinLoc;
 Locn _origMaxLoc;
+char _prevAbleData[36];
 int zoomDirn = 0;
 Position zoomTarget;
 char prevCallsign[16];
@@ -234,13 +234,15 @@ void initVars()
     _border[2].lon = 0.017;
     _round[2].lat = 0.5 / _border[2].lat;
     _round[2].lon = 0.5 / _border[2].lon;
+
+    *_prevAbleData = '\0';
 }
 
 void cleanupTags()
 {
     for (int i = 0; i < _aircraftCount; i++) {
-        cleanupBitmap(_aircraftData[_set][i].label.bmp);
-        _aircraftData[_set][i].label.bmp = NULL;
+        cleanupBitmap(_aircraftData[i].label.bmp);
+        _aircraftData[i].label.bmp = NULL;
     }
 }
 
@@ -868,12 +870,12 @@ void createTag(PosData* posData)
 
 void drawAircraft(int idx)
 {
-    if (_settings.excludeHighAlt && _aircraftData[_set][idx].altitude > 6000) {
+    if (_settings.excludeHighAlt && _aircraftData[idx].altitude > 6000) {
         return;
     }
 
     double x, y;
-    locationToDisplay(&_aircraftData[_set][idx].loc, &x, &y);
+    locationToDisplay(&_aircraftData[idx].loc, &x, &y);
 
     int bounds = 25;
     if (x < -bounds || y < -bounds || x > _displayWidth + bounds || y > _displayHeight + bounds) {
@@ -881,64 +883,17 @@ void drawAircraft(int idx)
     }
 
     if (_settings.tags > 0) {
-        if (_aircraftData[_set][idx].label.bmp == NULL) {
-            createTag(&_aircraftData[_set][idx]);
+        if (_aircraftData[idx].label.bmp == NULL) {
+            createTag(&_aircraftData[idx]);
         }
 
         // Draw tag
-        al_draw_bitmap(_aircraftData[_set][idx].label.bmp, x - _aircraftData[_set][idx].label.width / 2, y + 20, 0);
+        al_draw_bitmap(_aircraftData[idx].label.bmp, x - _aircraftData[idx].label.width / 2, y + 20, 0);
     }
 
     // Draw aircraft
     double scale = 0.18;
-    al_draw_scaled_rotated_bitmap(_aircraftData[_set][idx].bmp, _aircraft.x, _aircraft.y, x, y, scale, scale, _aircraftData[_set][idx].heading * DegreesToRadians, 0);
-}
-
-void drawPanel()
-{
-    //if (_track.count == 0)
-    //    return;
-
-    //int x = _displayWidth - _flightData.width;
-    //int y = _displayHeight - _flightData.height;
-    //al_draw_bitmap(_flightData.bmp, x, y, 0);
-
-    //int altX = x + 70;
-    //int altY = y + 331;
-
-    //double alt;
-
-    //if (_track.pos[_aircraftPos].altitude > 10000) {
-    //    alt = 10000;
-    //}
-    //else {
-    //    alt = _track.pos[_aircraftPos].altitude;
-    //}
-
-    //altY -= round(32.5 * alt / 1000);
-    //al_draw_bitmap(_altArrow.bmp, altX, altY, 0);
-
-    //if (prevSpeed != _track.pos[_aircraftPos].speed) {
-    //    prevSpeed = _track.pos[_aircraftPos].speed;
-    //    createSpeedText(prevSpeed);
-    //}
-
-    //al_draw_bitmap(_speedText.bmp, altX + 34, altY + 3, 0);
-
-    //time_t timestamp = _aircraftTime;
-
-    //if (timestamp > _track.pos[0].timestamp) {
-    //    timestamp = _track.pos[0].timestamp;
-    //}
-
-    //struct tm* time = localtime(&timestamp);
-    //if (prevHour != time->tm_hour || prevMin != time->tm_min) {
-    //    prevHour = time->tm_hour;
-    //    prevMin = time->tm_min;
-    //    createTimeText(prevHour, prevMin);
-    //}
-
-    //al_draw_bitmap(_timeText.bmp, x + 62, y + 358, 0);
+    al_draw_scaled_rotated_bitmap(_aircraftData[idx].bmp, _aircraft.x, _aircraft.y, x, y, scale, scale, _aircraftData[idx].heading * DegreesToRadians, 0);
 }
 
 void render()
@@ -952,10 +907,6 @@ void render()
 
     for (int i = 0; i < _aircraftCount; i++) {
         drawAircraft(i);
-    }
-
-    if (_haveAble) {
-        drawPanel();
     }
 }
 

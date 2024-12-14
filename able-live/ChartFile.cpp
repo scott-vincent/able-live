@@ -183,3 +183,29 @@ bool loadCalibrationData(const char* chartFile, ChartData* chartData)
     fclose(inf);
     return true;
 }
+
+bool readUrl(const char* filename, char* url)
+{
+    FILE* inf = fopen(filename, "r");
+    if (!inf) {
+        printf("URL file not found: %s\n", filename);
+        return false;
+    }
+
+    int size = fread(url, 1, 256, inf);
+    url[size] = '\0';
+
+    char* pos = strchr(url, '\r');
+    if (pos) {
+        *pos = '\0';
+    }
+
+    pos = strchr(url, '\n');
+    if (pos) {
+        *pos = '\0';
+    }
+
+    fclose(inf);
+
+    return true;
+}

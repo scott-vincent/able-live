@@ -9,13 +9,15 @@
 #include <curl/curl.h>
 #include "able_live.h"
 #include "AbleClient.h"
+#include "ChartFile.h"
 
 // Externals
 extern bool _quit;
 extern bool _serverQuit;
 
 // Variables
-char _url[256];
+char _pilotAwareUrl[256];
+char _ableDisplayUrl[256];
 bool _fr24Request = false;
 bool _ableRequest = false;
 bool _ableResponse = false;
@@ -53,51 +55,6 @@ size_t curlWrite(void* inData, size_t size, size_t inSize, void* userdata)
     return inSize;
 }
 
-bool ping(char* url)
-{
-    // Extract ip address
-    char ip[256];
-
-    char* pos = strchr(url, '/');
-    if (!pos) {
-        return false;
-    }
-    pos++;
-
-    if (*pos != '/') {
-        return false;
-    }
-    pos++;
-
-    char* atPos = strchr(pos, '@');
-    if (atPos) {
-        pos = atPos + 1;
-    }
-
-    strcpy(ip, pos);
-
-    pos = strchr(ip, '/');
-    if (!pos) {
-        return false;
-    }
-    *pos = '\0';
-
-    pos = strchr(ip, ':');
-    if (pos) {
-        *pos = '\0';
-    }
-
-    char command[64];
-#ifdef _WINDOWS
-    sprintf(command, "ping -4 -n 1 -w 1000 %s", ip);
-#else
-    sprintf(command, "ping -4 -c 1 -w 1 %s", ip);
-#endif
-
-    int res = system(command);
-    return res == 0;
-}
-
 void serverInit()
 {
     curl_global_init(CURL_GLOBAL_DEFAULT);
@@ -111,52 +68,13 @@ void serverInit()
     curl_easy_setopt(_curl, CURLOPT_WRITEDATA, &_ableData);
     curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, &curlWrite);
 
-    // Get working URL
-    FILE* inf = fopen(AbleLiveUrls, "r");
-    if (!inf) {
-        printf("File not found: %s\n", AbleLiveUrls);
+    // Get URLs
+    if (!readUrl(PilotAware_Url, _pilotAwareUrl)) {
         return;
     }
 
-    char urlLocal[256];
-    char urlInternet[256];
-    *urlInternet = '\0';
-
-    int size = fread(urlLocal, 1, 256, inf);
-    urlLocal[size] = '\0';
-
-    char* pos = strchr(urlLocal, '\n');
-    if (pos) {
-        *pos = '\0';
-        strcpy(urlInternet, pos + 1);
-        pos = strchr(urlInternet, '\n');
-        if (pos) {
-            *pos = '\0';
-        }
-
-        pos = strchr(urlInternet, '\r');
-        if (pos) {
-            *pos = '\0';
-        }
-    }
-
-    pos = strchr(urlLocal, '\r');
-    if (pos) {
-        *pos = '\0';
-    }
-
-    fclose(inf);
-
-    if (*urlInternet == '\0') {
-        strcpy(_url, urlLocal);
-    }
-    else if (ping(urlLocal)) {
-        printf("Found local PilotAware\n");
-        strcpy(_url, urlLocal);
-    }
-    else {
-        printf("Using internet PilotAware as local not found\n");
-        strcpy(_url, urlInternet);
+    if (!readUrl(AbleDisplay_Url, _ableDisplayUrl)) {
+        return;
     }
 
     _initialised = true;
@@ -186,10 +104,10 @@ bool doRequest()
     }
 
     if (_fr24Request) {
-        curl_easy_setopt(_curl, CURLOPT_URL, FR24_Url);
+        curl_easy_setopt(_curl, CURLOPT_URL, _ableDisplayUrl);
     }
     else {
-        curl_easy_setopt(_curl, CURLOPT_URL, _url);
+        curl_easy_setopt(_curl, CURLOPT_URL, _pilotAwareUrl);
     }
 
     if (_ableData) {

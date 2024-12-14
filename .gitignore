@@ -2,6 +2,7 @@
 .vs
 packages
 **/able-live.settings
+**/pilotaware_data
 **/x64
 **/debug
 **/Debug

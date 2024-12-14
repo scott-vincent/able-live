@@ -6,8 +6,13 @@
 //#define DEBUG
 
 // Constants
-const char AbleLiveUrls[] = "../../able-live.urls";
-const char FR24_Url[] = "https://raspi5.tail518e1b.ts.net/ablelivedata";
+#ifdef _WINDOWS
+const char WriteDataFile[] = "pilotaware_data";
+#else
+const char WriteDataFile[] = "/dev/shm/pilotaware_data";    // Send PilotAware data to AbleDisplay
+#endif
+const char PilotAware_Url[] = "../../pilotaware.uri";       // Fetch PilotAware data from ognpaw
+const char AbleDisplay_Url[] = "../../able-display.uri";    // Fetch FR24 data from AbleDisplay
 const int MaxAircraft = 256;
 const char ImagesDir[] = "resources/images";
 const char FontsDir[] = "resources/fonts";

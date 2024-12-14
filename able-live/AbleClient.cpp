@@ -19,14 +19,15 @@ extern AircraftDrawData _aircraft;
 extern bool _haveAble;
 extern Locn _minLoc;
 extern Locn _maxLoc;
-extern PosData _aircraftData[2][MaxAircraft];
-extern int _set;
+extern PosData _aircraftData[MaxAircraft];
 extern int _aircraftCount;
+extern char _prevAbleData[36];
 
 // Variables
 Locn minAbleLoc;
 Locn maxAbleLoc;
 bool haveAbleNum[16];
+int ableAlt[16];
 
 PosData me;
 Locn meLoc[256];
@@ -89,48 +90,52 @@ double jsonNum(char* str)
 
 void fixCallsign(char* callsign)
 {
-    if (callsign[0] != 'G' || callsign[1] != '-') {
+    if (strlen(callsign) < 4 || callsign[0] != 'G') {
         return;
     }
 
-    if (callsign[2] == 'B') {
-        if (strcmp(&callsign[3], "CIR") == 0) {
-            strcpy(callsign, "ABLE03");
-        }
-        else if (strcmp(&callsign[3], "MFP") == 0) {
-            strcpy(callsign, "ABLE04");
-        }
-        else if (strcmp(&callsign[3], "LVI") == 0) {
-            strcpy(callsign, "ABLE08");
-        }
-        else if (strcmp(&callsign[3], "NNY") == 0) {
-            strcpy(callsign, "ABLE11");
-        }
-        else if (strcmp(&callsign[3], "RUD") == 0) {
-            strcpy(callsign, "ABLE12");
-        }
+    char suffix[16];
+    if (callsign[1] == '-') {
+        strcpy(suffix, &callsign[2]);
     }
-    else if (callsign[2] == 'I') {
-        if (strcmp(&callsign[3], "DOO") == 0) {
-            strcpy(callsign, "ABLE05");
-        }
-        else if (strcmp(&callsign[3], "DID") == 0) {
-            strcpy(callsign, "ABLE07");
-        }
-        else if (strcmp(&callsign[3], "CAN") == 0) {
-            strcpy(callsign, "ABLE10");
-        }
+    else {
+        strcpy(suffix, &callsign[1]);
     }
-    else if (strcmp(&callsign[2], "UCAN") == 0) {
+
+    if (strcmp(suffix, "UCAN") == 0) {
         strcpy(callsign, "ABLE01");
     }
-    else if (strcmp(&callsign[2], "OMJA") == 0) {
+    else if (strcmp(suffix, "OMJA") == 0) {
         strcpy(callsign, "ABLE02");
     }
-    else if (strcmp(&callsign[2], "SIXE") == 0) {
+    else if (strcmp(suffix, "BCIR") == 0) {
+        strcpy(callsign, "ABLE03");
+    }
+    else if (strcmp(suffix, "BMFP") == 0) {
+        strcpy(callsign, "ABLE04");
+    }
+    else if (strcmp(suffix, "IDOO") == 0) {
+        strcpy(callsign, "ABLE05");
+    }
+    else if (strcmp(suffix, "SIXE") == 0) {
         strcpy(callsign, "ABLE06");
     }
-    else if (strcmp(&callsign[2], "CDMA") == 0) {
+    else if (strcmp(suffix, "IDID") == 0) {
+        strcpy(callsign, "ABLE07");
+    }
+    else if (strcmp(suffix, "BLVI") == 0) {
+        strcpy(callsign, "ABLE08");
+    }
+    else if (strcmp(suffix, "ICAN") == 0) {
+        strcpy(callsign, "ABLE10");
+    }
+    else if (strcmp(suffix, "BNNY") == 0) {
+        strcpy(callsign, "ABLE11");
+    }
+    else if (strcmp(suffix, "BRUD") == 0) {
+        strcpy(callsign, "ABLE12");
+    }
+    else if (strcmp(suffix, "CDMA") == 0) {
         strcpy(callsign, "ABLE14");
     }
 }
@@ -342,44 +347,78 @@ void initArea()
 
 void updateArea()
 {
-    if (strncmp(_aircraftData[_set][_aircraftCount].callsign, "ABLE", 4) == 0) {
-        _aircraftData[_set][_aircraftCount].isAble = true;
+    if (strncmp(_aircraftData[_aircraftCount].callsign, "ABLE", 4) == 0) {
+        _aircraftData[_aircraftCount].isAble = true;
         _haveAble = true;
 
-        int num = atoi(&_aircraftData[_set][_aircraftCount].callsign[4]);
+        int num = atoi(&_aircraftData[_aircraftCount].callsign[4]);
         haveAbleNum[num - 1] = true;
+        ableAlt[num - 1] = _aircraftData[_aircraftCount].altitude;
     }
     else {
-        _aircraftData[_set][_aircraftCount].isAble = false;
+        _aircraftData[_aircraftCount].isAble = false;
     }
 
-    if (_aircraftData[_set][_aircraftCount].isAble) {
-        if (minAbleLoc.lat > _aircraftData[_set][_aircraftCount].loc.lat) {
-            minAbleLoc.lat = _aircraftData[_set][_aircraftCount].loc.lat;
+    if (_aircraftData[_aircraftCount].isAble) {
+        if (minAbleLoc.lat > _aircraftData[_aircraftCount].loc.lat) {
+            minAbleLoc.lat = _aircraftData[_aircraftCount].loc.lat;
         }
-        if (minAbleLoc.lon > _aircraftData[_set][_aircraftCount].loc.lon) {
-            minAbleLoc.lon = _aircraftData[_set][_aircraftCount].loc.lon;
+        if (minAbleLoc.lon > _aircraftData[_aircraftCount].loc.lon) {
+            minAbleLoc.lon = _aircraftData[_aircraftCount].loc.lon;
         }
-        if (maxAbleLoc.lat < _aircraftData[_set][_aircraftCount].loc.lat) {
-            maxAbleLoc.lat = _aircraftData[_set][_aircraftCount].loc.lat;
+        if (maxAbleLoc.lat < _aircraftData[_aircraftCount].loc.lat) {
+            maxAbleLoc.lat = _aircraftData[_aircraftCount].loc.lat;
         }
-        if (maxAbleLoc.lon < _aircraftData[_set][_aircraftCount].loc.lon) {
-            maxAbleLoc.lon = _aircraftData[_set][_aircraftCount].loc.lon;
+        if (maxAbleLoc.lon < _aircraftData[_aircraftCount].loc.lon) {
+            maxAbleLoc.lon = _aircraftData[_aircraftCount].loc.lon;
         }
     }
     else {
-        if (_minLoc.lat > _aircraftData[_set][_aircraftCount].loc.lat) {
-            _minLoc.lat = _aircraftData[_set][_aircraftCount].loc.lat;
+        if (_minLoc.lat > _aircraftData[_aircraftCount].loc.lat) {
+            _minLoc.lat = _aircraftData[_aircraftCount].loc.lat;
         }
-        if (_minLoc.lon > _aircraftData[_set][_aircraftCount].loc.lon) {
-            _minLoc.lon = _aircraftData[_set][_aircraftCount].loc.lon;
+        if (_minLoc.lon > _aircraftData[_aircraftCount].loc.lon) {
+            _minLoc.lon = _aircraftData[_aircraftCount].loc.lon;
         }
-        if (_maxLoc.lat < _aircraftData[_set][_aircraftCount].loc.lat) {
-            _maxLoc.lat = _aircraftData[_set][_aircraftCount].loc.lat;
+        if (_maxLoc.lat < _aircraftData[_aircraftCount].loc.lat) {
+            _maxLoc.lat = _aircraftData[_aircraftCount].loc.lat;
         }
-        if (_maxLoc.lon < _aircraftData[_set][_aircraftCount].loc.lon) {
-            _maxLoc.lon = _aircraftData[_set][_aircraftCount].loc.lon;
+        if (_maxLoc.lon < _aircraftData[_aircraftCount].loc.lon) {
+            _maxLoc.lon = _aircraftData[_aircraftCount].loc.lon;
         }
+    }
+}
+
+void writeAbleData()
+{
+    char ableData[36];
+    strcpy(ableData, "--,--,--,--,--,--,--,--,--,--,--,--");
+
+    if (_haveAble) {
+        for (int i = 0; i < 12; i++) {
+            if (haveAbleNum[i]) {
+                int alt = 0;
+                if (ableAlt[i] > 99999) {
+                    alt = 99;
+                }
+                else if (ableAlt[i] > 0) {
+                    alt = floor(ableAlt[i] / 100);
+                }
+                ableData[i * 3] = '0' + (alt / 10);
+                ableData[i * 3 + 1] = '0' + (alt % 10);
+            }
+        }
+    }
+
+    if (strcmp(_prevAbleData, ableData) != 0) {
+        strcpy(_prevAbleData, ableData);
+        FILE* outf = fopen(WriteDataFile, "w");
+        if (!outf) {
+            printf("Failed to write file: %s\n", WriteDataFile);
+            return;
+        }
+        fprintf(outf, "%s\n", ableData);
+        fclose(outf);
     }
 }
 
@@ -426,10 +465,13 @@ bool GetLiveData()
         return false;
     }
 
-    int oldSet = _set;
-    int oldCount = _aircraftCount;
+    // Cleanup old labels
+    for (int i = 0; i < _aircraftCount; i++) {
+        if (_aircraftData[i].label.bmp) {
+            cleanupBitmap(_aircraftData[i].label.bmp);
+        }
+    }
 
-    _set = 1 - _set;
     _aircraftCount = 0;
     _haveAble = false;
 
@@ -447,31 +489,31 @@ bool GetLiveData()
         if (!pos) {
             break;
         }
-        _aircraftData[_set][_aircraftCount].id = jsonNum(pos);
+        _aircraftData[_aircraftCount].id = jsonNum(pos);
 
         pos = strstr(pos, "\"GAlt\":");
         if (!pos) {
             break;
         }
-        _aircraftData[_set][_aircraftCount].altitude = jsonNum(pos);
+        _aircraftData[_aircraftCount].altitude = jsonNum(pos);
 
         pos = strstr(pos, "\"Call\":");
         if (!pos) {
             break;
         }
-        strcpy(_aircraftData[_set][_aircraftCount].callsign, jsonStr(pos));
+        strcpy(_aircraftData[_aircraftCount].callsign, jsonStr(pos));
 
         pos = strstr(pos, "\"Lat\":");
         if (!pos) {
             break;
         }
-        _aircraftData[_set][_aircraftCount].loc.lat = jsonNum(pos);;
+        _aircraftData[_aircraftCount].loc.lat = jsonNum(pos);;
 
         pos = strstr(pos, "\"Long\":");
         if (!pos) {
             break;
         }
-        _aircraftData[_set][_aircraftCount].loc.lon = jsonNum(pos);;
+        _aircraftData[_aircraftCount].loc.lon = jsonNum(pos);;
 
         pos = strstr(pos, "\"PosTime\":");
         if (!pos) {
@@ -488,59 +530,24 @@ bool GetLiveData()
         if (!pos) {
             break;
         }
-        _aircraftData[_set][_aircraftCount].speed = jsonNum(pos);;
+        _aircraftData[_aircraftCount].speed = jsonNum(pos);;
 
         pos = strstr(pos, "\"Trak\":");
         if (!pos) {
             break;
         }
-        _aircraftData[_set][_aircraftCount].heading = jsonNum(pos);;
+        _aircraftData[_aircraftCount].heading = jsonNum(pos);;
 
         pos = strstr(pos, "\"Type\":");
         if (!pos) {
             break;
         }
-        strncpy(_aircraftData[_set][_aircraftCount].typeCode, jsonStr(pos), 7);
-        _aircraftData[_set][_aircraftCount].typeCode[7] = '\0';
+        strncpy(_aircraftData[_aircraftCount].typeCode, jsonStr(pos), 7);
+        _aircraftData[_aircraftCount].typeCode[7] = '\0';
 
-        _aircraftData[_set][_aircraftCount].label.bmp = NULL;
-
-        bool found = false;
-        for (int i = 0; i < oldCount; i++) {
-            if (_aircraftData[_set][_aircraftCount].id == _aircraftData[oldSet][i].id && _aircraftData[_set][_aircraftCount].id != -1) {
-                found = true;
-                strcpy(_aircraftData[_set][_aircraftCount].callsign, _aircraftData[oldSet][i].callsign);
-                _aircraftData[_set][_aircraftCount].bmp = _aircraftData[oldSet][i].bmp;
-                _aircraftData[_set][_aircraftCount].isAble = _aircraftData[oldSet][i].isAble;
-
-                if (_settings.tags != 0 && _aircraftData[oldSet][i].label.bmp) {
-                    bool wantBmp = true;
-                    if (strcmp(_aircraftData[_set][_aircraftCount].typeCode, _aircraftData[oldSet][i].typeCode) != 0) {
-                        printf("Model code for %s has changed: %s -> %s\n", _aircraftData[_set][_aircraftCount].callsign, _aircraftData[oldSet][i].typeCode, _aircraftData[_set][_aircraftCount].typeCode);
-                        wantBmp = false;
-                    }
-                    else if (_settings.tags == 2 && _aircraftData[_set][_aircraftCount].speed != _aircraftData[oldSet][i].speed) {
-                        wantBmp = false;
-                    }
-                    else if (_settings.tags == 2 && _aircraftData[_set][_aircraftCount].altitude != _aircraftData[oldSet][i].altitude) {
-                        wantBmp = false;
-                    }
-
-                    if (wantBmp) {
-                        // Move label to new
-                        //printf("keep tag: %s\n", _aircraftData[oldSet][i].callsign);
-                        memcpy(&_aircraftData[_set][_aircraftCount].label, &_aircraftData[oldSet][i].label, sizeof(DrawData));
-                        _aircraftData[oldSet][i].label.bmp = NULL;
-                    }
-                }
-                break;
-            }
-        }
-
-        if (!found) {
-            fixCallsign(_aircraftData[_set][_aircraftCount].callsign);
-            _aircraftData[_set][_aircraftCount].bmp = getBmp(_aircraftData[_set][_aircraftCount].callsign, _aircraftData[_set][_aircraftCount].typeCode);
-        }
+        fixCallsign(_aircraftData[_aircraftCount].callsign);
+        _aircraftData[_aircraftCount].bmp = getBmp(_aircraftData[_aircraftCount].callsign, _aircraftData[_aircraftCount].typeCode);
+        _aircraftData[_aircraftCount].label.bmp = NULL;
 
         updateArea();
         _aircraftCount++;
@@ -558,29 +565,21 @@ bool GetLiveData()
     pos = strchr(fr24Data, '#');
     while (pos) {
         pos++;
-        if (addFr24(pos, &_aircraftData[_set][_aircraftCount])) {
+        if (addFr24(pos, &_aircraftData[_aircraftCount])) {
             updateArea();
             _aircraftCount++;
         }
         pos = strchr(pos, '#');
     }
 
-    // Cleanup old labels
-    for (int i = 0; i < oldCount; i++) {
-        if (_aircraftData[oldSet][i].label.bmp) {
-            //printf("remove tag: %s\n", _aircraftData[oldSet][i].callsign);
-            cleanupBitmap(_aircraftData[oldSet][i].label.bmp);
-        }
-    }
+    writeAbleData();
 
     if (_haveAble) {
         _minLoc.lat = minAbleLoc.lat;
         _minLoc.lon = minAbleLoc.lon;
         _maxLoc.lat = maxAbleLoc.lat;
         _maxLoc.lon = maxAbleLoc.lon;
-    }
 
-    if (_haveAble) {
         // Limit area to maximum large map size
         if (_minLoc.lat < MinLatLarge) {
             _minLoc.lat = MinLatLarge;
