@@ -76,6 +76,7 @@ bool _mouseHidden = false;
 PosData _aircraftData[MaxAircraft];
 int _aircraftCount = 0;
 bool _haveAble = false;
+Trail _ableTrail[16];
 Locn _minLoc;
 Locn _maxLoc;
 Locn _origMinLoc;
@@ -236,6 +237,10 @@ void initVars()
     _round[2].lon = 0.5 / _border[2].lon;
 
     *_prevAbleData = '\0';
+
+    for (int i = 0; i < 16; i++) {
+        _ableTrail[i].count = 0;
+    }
 }
 
 void cleanupTags()
@@ -870,7 +875,7 @@ void createTag(PosData* posData)
 
 void drawAircraft(int idx)
 {
-    if (_settings.excludeHighAlt && _aircraftData[idx].altitude > 6000) {
+    if (_settings.excludeHighAlt && !_aircraftData[idx].isAble && _aircraftData[idx].altitude > 6000) {
         return;
     }
 
@@ -896,6 +901,31 @@ void drawAircraft(int idx)
     al_draw_scaled_rotated_bitmap(_aircraftData[idx].bmp, _aircraft.x, _aircraft.y, x, y, scale, scale, _aircraftData[idx].heading * DegreesToRadians, 0);
 }
 
+void drawTrail(Trail *trail, int num)
+{
+    ALLEGRO_COLOR colour;
+
+    switch (num % 5) {
+        case 0: colour = al_map_rgb(0xd0, 0x20, 0xd0); break;
+        case 1: colour = al_map_rgb(0x10, 0xb0, 0xb0); break;
+        case 2: colour = al_map_rgb(0xd0, 0x20, 0x20); break;
+        case 3: colour = al_map_rgb(0x20, 0xd0, 0x20); break;
+        case 4: colour = al_map_rgb(0x20, 0x20, 0xd0); break;
+    }
+
+    double x1, y1, x2, y2;
+    locationToDisplay(&trail->loc[0], &x1, &y1);
+
+    for (int i = 1; i < trail->count; i++) {
+        locationToDisplay(&trail->loc[i], &x2, &y2);
+
+        al_draw_line(round(x1), round(y1), round(x2), round(y2), colour, 2);
+
+        x1 = x2;
+        y1 = y2;
+    }
+}
+
 void render()
 {
     // Draw chart
@@ -904,6 +934,14 @@ void render()
 #ifdef DEBUG
     drawArea();
 #endif
+
+    if (_haveAble) {
+        for (int i = 0; i < 16; i++) {
+            if (_ableTrail[i].count > 0) {
+                drawTrail(&_ableTrail[i], i);
+            }
+        }
+    }
 
     for (int i = 0; i < _aircraftCount; i++) {
         drawAircraft(i);

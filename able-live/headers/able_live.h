@@ -128,6 +128,11 @@ struct PosData {
     bool isAble;
 };
 
+struct Trail {
+    int count;
+    Locn loc[6000];
+    time_t lastUpdate;
+};
 
 // Prototypes
 int showMessage(const char* message, bool isError, const char* title = NULL, bool canCancel = false);

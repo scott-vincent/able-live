@@ -22,6 +22,7 @@ extern Locn _maxLoc;
 extern PosData _aircraftData[MaxAircraft];
 extern int _aircraftCount;
 extern char _prevAbleData[36];
+extern Trail _ableTrail[16];
 
 // Variables
 Locn minAbleLoc;
@@ -373,8 +374,19 @@ void updateArea()
         _haveAble = true;
 
         int num = atoi(&_aircraftData[_aircraftCount].callsign[4]);
-        haveAbleNum[num - 1] = true;
-        ableAlt[num - 1] = _aircraftData[_aircraftCount].altitude;
+        if (num > 0) {
+            num--;
+        }
+        haveAbleNum[num] = true;
+        ableAlt[num] = _aircraftData[_aircraftCount].altitude;
+
+        int i = _ableTrail[num].count;
+        if (i < 6000) {
+            _ableTrail[num].loc[i].lat = _aircraftData[_aircraftCount].loc.lat;
+            _ableTrail[num].loc[i].lon = _aircraftData[_aircraftCount].loc.lon;
+            time(&_ableTrail[num].lastUpdate);
+            _ableTrail[num].count++;
+        }
     }
     else {
         _aircraftData[_aircraftCount].isAble = false;
@@ -597,6 +609,12 @@ bool GetLiveData()
     }
 
     writeAbleData();
+
+    for (int i = 0; i < 16; i++) {
+        if (!haveAbleNum[i] && _ableTrail[i].count > 0 && now - _ableTrail[i].lastUpdate > 30) {
+            _ableTrail[i].count = 0;
+        }
+    }
 
     if (_haveAble) {
         _minLoc.lat = minAbleLoc.lat;
