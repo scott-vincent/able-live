@@ -293,13 +293,34 @@ bool addMe()
 
 bool addFr24(char *pos, PosData* posData)
 {
-    int num;
+    int num = atoi(pos);
+    if (num < 1 || num > 16) {
+        printf("addFr24: Bad data (num out of range): %s\n", pos);
+        return false;
+    }
 
-    int count = sscanf(pos, "%d,%7s,%lf,%lf,%d,%d,%d", &num, posData->typeCode, &posData->loc.lat, &posData->loc.lon, &posData->heading, &posData->altitude, &posData->speed);
-    posData->typeCode[7] = '\0';
+    pos = strchr(pos, ',');
+    if (!pos) {
+        printf("addFr24: Bad data (no typeCode): %s\n", pos);
+        return false;
+    }
+    pos++;
 
-    if (count != 7) {
-        printf("addFr24: Bad data -> %s\n", pos);
+    char* startPos = pos;
+    pos = strchr(pos, ',');
+    if (!pos) {
+        printf("addFr24: Bad data (no lat): %s\n", pos);
+        return false;
+    }
+    pos++;
+
+    int len = pos - startPos;
+    strncpy(posData->typeCode, startPos, len);
+    posData->typeCode[len] = '\0';
+
+    int count = sscanf(pos, "%lf,%lf,%d,%d,%d",  &posData->loc.lat, &posData->loc.lon, &posData->heading, &posData->altitude, &posData->speed);
+    if (count != 5) {
+        printf("addFr24: Bad data (5->%d) -> %s\n", count, pos);
         return false;
     }
 
@@ -319,7 +340,7 @@ bool addFr24(char *pos, PosData* posData)
     posData->bmp = _aircraft.Able;
     posData->label.bmp = NULL;
 
-    printf("addFr24: Added %s (%s) at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->typeCode, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
+    //printf("addFr24: Added %s (%s) at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->typeCode, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
     return true;
 }
 
