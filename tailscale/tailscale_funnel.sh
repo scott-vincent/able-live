@@ -1,6 +1,6 @@
 usage="Usage: $0 [enable|disable]"
 
-local="/dev/shm/pilotaware_data"
+local="/tmp/pilotaware_data"
 path="/pilotaware_data"
 
 if [ "$1" = enable ]
