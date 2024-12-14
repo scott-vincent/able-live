@@ -1,0 +1,2 @@
+sudo touch /usr/local/bin/able-suppress.dat
+sudo pkill able-live
