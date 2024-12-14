@@ -423,7 +423,7 @@ void writeAbleData()
                     alt = 99;
                 }
                 else if (ableAlt[i] > 0) {
-                    alt = floor(ableAlt[i] / 100);
+                    alt = round(ableAlt[i] / 100);
                 }
                 ableData[i * 3] = '0' + (alt / 10);
                 ableData[i * 3 + 1] = '0' + (alt % 10);
