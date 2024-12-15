@@ -1,7 +1,15 @@
 usage="Usage: $0 [enable|disable]"
 
-local="/tmp/pilotaware_data"
+local="/mem/pilotaware_data"
 path="/pilotaware_data"
+
+# Create RAM drive
+if [ ! -d /mem ]
+then
+  sudo mkdir /mem
+  echo tmpfs /mem tmpfs nodev,nosuid,size=32K 0 0 | sudo tee -a /etc/fstab >/dev/null
+  sudo mount -a
+fi
 
 if [ "$1" = enable ]
 then
