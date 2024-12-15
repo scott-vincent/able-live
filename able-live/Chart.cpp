@@ -77,6 +77,7 @@ PosData _aircraftData[MaxAircraft];
 int _aircraftCount = 0;
 bool _haveAble = false;
 Trail _ableTrail[16];
+ALLEGRO_COLOR ableColour[16];
 Locn _minLoc;
 Locn _maxLoc;
 Locn _origMinLoc;
@@ -241,6 +242,23 @@ void initVars()
     for (int i = 0; i < 16; i++) {
         _ableTrail[i].count = 0;
     }
+
+    ableColour[0] = al_map_rgb(0xe9, 0x52, 0xff);
+    ableColour[1] = al_map_rgb(0xff, 0x93, 0x52);
+    ableColour[2] = al_map_rgb(0x52, 0xff, 0xff);
+    ableColour[3] = al_map_rgb(0xff, 0x52, 0x52);
+    ableColour[4] = al_map_rgb(0xff, 0xd4, 0x52);
+    ableColour[5] = al_map_rgb(0x52, 0xff, 0x7d);
+    ableColour[6] = al_map_rgb(0x52, 0xbe, 0xff);
+    ableColour[7] = al_map_rgb(0xa8, 0xff, 0x52);
+    ableColour[8] = al_map_rgb(0x52, 0xff, 0xbe);
+    ableColour[9] = al_map_rgb(0x67, 0x52, 0xff);
+    ableColour[10] = al_map_rgb(0x67, 0xff, 0x52);
+    ableColour[11] = al_map_rgb(0xe8, 0xff, 0x52);
+    ableColour[12] = al_map_rgb(0x52, 0x7d, 0xff);
+    ableColour[13] = al_map_rgb(0xa8, 0x52, 0xff);
+    ableColour[14] = al_map_rgb(0xff, 0x52, 0xd4);
+    ableColour[15] = al_map_rgb(0xff, 0x52, 0x93);
 }
 
 void cleanupTags()
@@ -903,23 +921,13 @@ void drawAircraft(int idx)
 
 void drawTrail(Trail *trail, int num)
 {
-    ALLEGRO_COLOR colour;
-
-    switch (num % 5) {
-        case 0: colour = al_map_rgb(0xd0, 0x20, 0xd0); break;
-        case 1: colour = al_map_rgb(0x10, 0xb0, 0xb0); break;
-        case 2: colour = al_map_rgb(0xd0, 0x20, 0x20); break;
-        case 3: colour = al_map_rgb(0x20, 0xd0, 0x20); break;
-        case 4: colour = al_map_rgb(0x20, 0x20, 0xd0); break;
-    }
-
     double x1, y1, x2, y2;
     locationToDisplay(&trail->loc[0], &x1, &y1);
 
     for (int i = 1; i < trail->count; i++) {
         locationToDisplay(&trail->loc[i], &x2, &y2);
 
-        al_draw_line(round(x1), round(y1), round(x2), round(y2), colour, 2);
+        al_draw_line(round(x1), round(y1), round(x2), round(y2), ableColour[num], 2);
 
         x1 = x2;
         y1 = y2;
