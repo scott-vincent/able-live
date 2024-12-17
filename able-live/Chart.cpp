@@ -245,7 +245,7 @@ void initVars()
 
     ableColour[0] = al_map_rgb(0xe9, 0x52, 0xff);
     ableColour[1] = al_map_rgb(0xff, 0x93, 0x52);
-    ableColour[2] = al_map_rgb(0x52, 0xff, 0xff);
+    ableColour[2] = al_map_rgb(0xff, 0x52, 0x52);
     ableColour[3] = al_map_rgb(0xff, 0x52, 0xd4);
     ableColour[4] = al_map_rgb(0xff, 0xd4, 0x52);
     ableColour[5] = al_map_rgb(0x52, 0xff, 0x7d);
@@ -257,7 +257,7 @@ void initVars()
     ableColour[11] = al_map_rgb(0xe8, 0xff, 0x52);
     ableColour[12] = al_map_rgb(0x52, 0x7d, 0xff);
     ableColour[13] = al_map_rgb(0xa8, 0x52, 0xff);
-    ableColour[14] = al_map_rgb(0xff, 0x52, 0x52);
+    ableColour[14] = al_map_rgb(0x52, 0xff, 0xff);
     ableColour[15] = al_map_rgb(0xff, 0x52, 0x93);
 }
 
@@ -950,6 +950,19 @@ void render()
             }
         }
     }
+
+#ifdef COLOUR_DEBUG
+    _ableTrail[15].count = 2;
+    _ableTrail[15].loc[0].lon = -1.0;
+    _ableTrail[15].loc[1].lon = -0.5;
+
+    for (int i = 0; i < 16; i++) {
+        _ableTrail[15].loc[0].lat = 51.45 - i * 0.01;
+        _ableTrail[15].loc[1].lat = _ableTrail[15].loc[0].lat;
+        drawTrail(&_ableTrail[15], i);
+    }
+    _ableTrail[15].count = 0;
+#endif
 
     for (int i = 0; i < _aircraftCount; i++) {
         drawAircraft(i);

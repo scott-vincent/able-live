@@ -591,7 +591,7 @@ bool GetLiveData()
 
 #ifdef DEBUG
     if (addMe()) {
-        memcpy(&_aircraftData[_set][_aircraftCount], &me, sizeof(PosData));
+        memcpy(&_aircraftData[_aircraftCount], &me, sizeof(PosData));
         updateArea();
         _aircraftCount++;
     }

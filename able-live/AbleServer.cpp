@@ -119,7 +119,14 @@ bool doRequest()
 
     CURLcode res = curl_easy_perform(_curl);
     if (res != CURLE_OK) {
-        fprintf(stderr, "Request failed: %s\n", curl_easy_strerror(res));
+        char url[256];
+        if (_fr24Request) {
+            strcpy(url, _ableDisplayUrl);
+        }
+        else {
+            strcpy(url, _pilotAwareUrl);
+        }
+        fprintf(stderr, "Request failed (%s): %s\n", url, curl_easy_strerror(res));
         return false;
     }
 

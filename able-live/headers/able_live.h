@@ -2,8 +2,9 @@
 #include <allegro5/allegro.h>
 #include <allegro5/allegro_image.h>
 
-// Comment out the following line when not debugging
+// Comment out the following lines when not debugging
 //#define DEBUG
+//#define COLOUR_DEBUG
 
 // Constants
 #ifdef _WINDOWS
