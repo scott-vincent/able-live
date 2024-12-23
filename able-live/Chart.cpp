@@ -1217,6 +1217,10 @@ void showChart()
                 _settings.excludeHighAlt = _haveAble;
                 initView();
             }
+            else if (milliDiff(lastSuccess, now) > 300000) {
+                printf("Too many errors: quitting\n");
+                _quit = true;
+            }
             else if (milliDiff(lastSuccess, now) > 30000) {
                 cleanupTags();
                 _aircraftCount = 0;
