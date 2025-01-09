@@ -124,7 +124,7 @@ void fixCallsign(char* callsign)
     else if (strcmp(suffix, "IDID") == 0) {
         strcpy(callsign, "ABLE07");
     }
-    else if (strcmp(suffix, "BLVI") == 0) {
+    else if (strcmp(suffix, "SAUP") == 0) {
         strcpy(callsign, "ABLE08");
     }
     else if (strcmp(suffix, "ICAN") == 0) {
