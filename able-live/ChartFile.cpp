@@ -209,3 +209,42 @@ bool readUrl(const char* filename, char* url)
 
     return true;
 }
+
+char* getGniusData()
+{
+    static char gniusData[256];
+
+    static char command[256];
+    strcpy(command, _moduleFilename);
+
+    char* last = strrchr(command, '\\');
+    if (!last) {
+        last = strrchr(command, '/');
+    }
+
+    if (last) {
+        last++;
+    }
+    else {
+        last = command;
+    }
+
+#ifdef _WINDOWS
+    strcpy(last, "gnius-sendevent.exe simvars");
+#else
+    strcpy(last, "gnius-sendevent simvars");
+#endif
+
+    FILE* pipe = _popen(command, "r");
+    if (!pipe) {
+        printf("Failed to run %s\n", command);
+        *gniusData = '\0';
+        return gniusData;
+    }
+
+    int bytes = fread(gniusData, 1, 256, pipe);
+    gniusData[bytes] = '\0';
+    fclose(pipe);
+
+    return gniusData;
+}

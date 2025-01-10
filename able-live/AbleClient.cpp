@@ -7,6 +7,7 @@
 #include <iostream>
 #include <allegro5/allegro_image.h>
 #include "able_live.h"
+#include "chartFile.h"
 
 // Externals
 extern bool _serverQuit;
@@ -292,17 +293,17 @@ bool addMe()
     return true;
 }
 
-bool addFr24(char *pos, PosData* posData)
+bool addAircraftData(char* pos, PosData* posData)
 {
     int num = atoi(pos);
     if (num < 1 || num > 16) {
-        printf("addFr24: Bad data (num out of range): %s\n", pos);
+        printf("addAircraftData: Bad data (num out of range): %s\n", pos);
         return false;
     }
 
     pos = strchr(pos, ',');
     if (!pos) {
-        printf("addFr24: Bad data (no typeCode): %s\n", pos);
+        printf("addAircraftData: Bad data (no typeCode): %s\n", pos);
         return false;
     }
     pos++;
@@ -310,7 +311,7 @@ bool addFr24(char *pos, PosData* posData)
     char* startPos = pos;
     pos = strchr(pos, ',');
     if (!pos) {
-        printf("addFr24: Bad data (no lat): %s\n", pos);
+        printf("addAircraftData: Bad data (no lat): %s\n", pos);
         return false;
     }
     int len = pos - startPos;
@@ -319,29 +320,38 @@ bool addFr24(char *pos, PosData* posData)
     posData->typeCode[len] = '\0';
     pos++;
 
-    int count = sscanf(pos, "%lf,%lf,%d,%d,%d",  &posData->loc.lat, &posData->loc.lon, &posData->heading, &posData->altitude, &posData->speed);
+    int count = sscanf(pos, "%lf,%lf,%d,%d,%d", &posData->loc.lat, &posData->loc.lon, &posData->heading, &posData->altitude, &posData->speed);
     if (count != 5) {
-        printf("addFr24: Bad data (5->%d) -> %s\n", count, pos);
+        printf("addAircraftData: Bad data (5->%d) -> %s\n", count, pos);
         return false;
     }
 
     if (haveAbleNum[num - 1]) {
         // Already have that Able
-        //printf("addFr24: Already have ABLE%02d\n", num);
+        //printf("addAircraftData: Already have ABLE%02d\n", num);
         return false;
     }
 
     if (posData->loc.lat > 52.22) {
-        //printf("addFr24: Excluding ABLE%02d (not in Southern England)\n", num);
+        //printf("addAircraftData: Excluding ABLE%02d (not in Southern England)\n", num);
         return false;
     }
 
     posData->id = -1;
-    sprintf(posData->callsign, "ABLE%02d", num);
+
+    if (num == 15) {
+        strcpy(posData->callsign, "G-NIUS");
+    }
+    else if (num == 16) {
+        strcpy(posData->callsign, "G-NIAI");
+    }
+    else {
+        sprintf(posData->callsign, "ABLE%02d", num);
+    }
     posData->bmp = _aircraft.Able;
     posData->label.bmp = NULL;
 
-    //printf("addFr24: Added %s (%s) at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->typeCode, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
+    //printf("addAircraftData: Added %s (%s) at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->typeCode, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
     return true;
 }
 
@@ -369,14 +379,28 @@ void initArea()
 
 void updateArea()
 {
-    if (strncmp(_aircraftData[_aircraftCount].callsign, "ABLE", 4) == 0) {
+    bool isGnius = strncmp(_aircraftData[_aircraftCount].callsign, "G-NIUS", 6) == 0;
+    bool isGniai = strncmp(_aircraftData[_aircraftCount].callsign, "G-NIAI", 6) == 0;
+
+    if (strncmp(_aircraftData[_aircraftCount].callsign, "ABLE", 4) == 0 || isGnius || isGniai) {
         _aircraftData[_aircraftCount].isAble = true;
         _haveAble = true;
 
-        int num = atoi(&_aircraftData[_aircraftCount].callsign[4]);
+        int num;
+        if (isGnius) {
+            num = 15;
+        }
+        else if (isGniai) {
+            num = 16;
+        }
+        else {
+            num = atoi(&_aircraftData[_aircraftCount].callsign[4]);
+        }
+
         if (num > 0) {
             num--;
         }
+
         haveAbleNum[num] = true;
         ableAlt[num] = _aircraftData[_aircraftCount].altitude;
 
@@ -601,11 +625,31 @@ bool GetLiveData()
     pos = strchr(fr24Data, '#');
     while (pos) {
         pos++;
-        if (addFr24(pos, &_aircraftData[_aircraftCount])) {
+        if (addAircraftData(pos, &_aircraftData[_aircraftCount])) {
             updateArea();
             _aircraftCount++;
         }
         pos = strchr(pos, '#');
+    }
+
+    // Add in G-NIUS data
+    char* gniusData = getGniusData();
+    pos = strchr(gniusData, '#');
+    while (pos) {
+        pos++;
+        if (addAircraftData(pos, &_aircraftData[_aircraftCount])) {
+            updateArea();
+            _aircraftCount++;
+        }
+        pos = strchr(pos, '#');
+    }
+
+    if (!haveAbleNum[14]) {
+        _ableTrail[14].count = 0;
+    }
+
+    if (!haveAbleNum[15]) {
+        _ableTrail[15].count = 0;
     }
 
     writeAbleData();
