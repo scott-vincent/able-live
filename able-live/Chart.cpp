@@ -28,6 +28,7 @@ const char AircraftJet[] = "resources/images/jet.png";
 const char AircraftTurboprop[] = "resources/images/turboprop.png";
 const char AircraftHeli[] = "resources/images/heli.png";
 const char AircraftAble[] = "resources/images/able.png";
+const char AircraftGnius[] = "resources/images/gnius.png";
 const char AircraftAirliner[] = "resources/images/airliner.png";
 const char AircraftHeavy[] = "resources/images/heavy.png";
 const char AircraftGlider[] = "resources/images/glider.png";
@@ -199,6 +200,7 @@ void initVars()
     _aircraft.Turboprop = NULL;
     _aircraft.Heli = NULL;
     _aircraft.Able = NULL;
+    _aircraft.Gnius = NULL;
     _aircraft.Airliner = NULL;
     _aircraft.Heavy = NULL;
     _aircraft.Glider = NULL;
@@ -492,6 +494,7 @@ void cleanup()
     cleanupBitmap(_aircraft.Turboprop);
     cleanupBitmap(_aircraft.Heli);
     cleanupBitmap(_aircraft.Able);
+    cleanupBitmap(_aircraft.Gnius);
     cleanupBitmap(_aircraft.Airliner);
     cleanupBitmap(_aircraft.Heavy);
     cleanupBitmap(_aircraft.Glider);
@@ -590,6 +593,11 @@ bool initAircraft()
 
     if (!(_aircraft.Able = al_load_bitmap(AircraftAble))) {
         printf("Missing file: %s\n", AircraftAble);
+        return false;
+    }
+
+    if (!(_aircraft.Gnius = al_load_bitmap(AircraftGnius))) {
+        printf("Missing file: %s\n", AircraftGnius);
         return false;
     }
 

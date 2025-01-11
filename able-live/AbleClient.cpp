@@ -250,7 +250,7 @@ bool addMe()
     }
 
     me.id = 12345;
-    strcpy(me.callsign, "ABLE15");
+    strcpy(me.callsign, "ABLE14");
     me.bmp = _aircraft.Able;
     me.altitude = 123;
     me.speed = 123;
@@ -341,14 +341,16 @@ bool addAircraftData(char* pos, PosData* posData)
 
     if (num == 15) {
         strcpy(posData->callsign, "G-NIUS");
+        posData->bmp = _aircraft.Gnius;
     }
     else if (num == 16) {
         strcpy(posData->callsign, "G-NIAI");
+        posData->bmp = _aircraft.Gnius;
     }
     else {
         sprintf(posData->callsign, "ABLE%02d", num);
+        posData->bmp = _aircraft.Able;
     }
-    posData->bmp = _aircraft.Able;
     posData->label.bmp = NULL;
 
     //printf("addAircraftData: Added %s (%s) at %f,%f hdg: %d speed: %d alt: %d\n", posData->callsign, posData->typeCode, posData->loc.lat, posData->loc.lon, posData->heading, posData->speed, posData->altitude);
@@ -644,18 +646,18 @@ bool GetLiveData()
         pos = strchr(pos, '#');
     }
 
-    if (!haveAbleNum[14]) {
-        _ableTrail[14].count = 0;
-    }
-
-    if (!haveAbleNum[15]) {
-        _ableTrail[15].count = 0;
-    }
-
     writeAbleData();
 
-    for (int i = 0; i < 16; i++) {
+    // ABLE aircraft stale after 30 seconds
+    for (int i = 0; i < 14; i++) {
         if (!haveAbleNum[i] && _ableTrail[i].count > 0 && now - _ableTrail[i].lastUpdate > 30) {
+            _ableTrail[i].count = 0;
+        }
+    }
+
+    // G-NIUS aircraft stale after 3 seconds
+    for (int i = 14; i < 16; i++) {
+        if (!haveAbleNum[i] && _ableTrail[i].count > 0 && now - _ableTrail[i].lastUpdate > 2) {
             _ableTrail[i].count = 0;
         }
     }

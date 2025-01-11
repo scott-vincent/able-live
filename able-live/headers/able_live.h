@@ -75,6 +75,7 @@ struct AircraftDrawData {
     ALLEGRO_BITMAP* Turboprop;
     ALLEGRO_BITMAP* Heli;
     ALLEGRO_BITMAP* Able;
+    ALLEGRO_BITMAP* Gnius;
     ALLEGRO_BITMAP* Airliner;
     ALLEGRO_BITMAP* Heavy;
     ALLEGRO_BITMAP* Glider;
