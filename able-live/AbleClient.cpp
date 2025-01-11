@@ -7,7 +7,7 @@
 #include <iostream>
 #include <allegro5/allegro_image.h>
 #include "able_live.h"
-#include "chartFile.h"
+#include "ChartFile.h"
 
 // Externals
 extern bool _serverQuit;

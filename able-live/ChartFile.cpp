@@ -1,5 +1,6 @@
 #ifdef _WINDOWS
 #include <windows.h>
+#define popen _popen
 #endif
 #include <iostream>
 #include "able_live.h"
@@ -235,7 +236,7 @@ char* getGniusData()
     strcpy(last, "gnius-sendevent simvars");
 #endif
 
-    FILE* pipe = _popen(command, "r");
+    FILE* pipe = popen(command, "r");
     if (!pipe) {
         printf("Failed to run %s\n", command);
         *gniusData = '\0';
