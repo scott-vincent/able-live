@@ -520,8 +520,6 @@ bool GetLiveData()
             }
         }
         _ableResponse = false;
-        printf("got\n");
-        printf("len: %d %s\n", strlen(_ableData), _ableData);
         strcpy(gniusData, _ableData);
     }
 
