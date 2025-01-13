@@ -18,7 +18,9 @@ extern bool _serverQuit;
 // Variables
 char _pilotAwareUrl[256];
 char _ableDisplayUrl[256];
+char _gniusLaptopUrl[256];
 bool _fr24Request = false;
+bool _gniusRequest = false;
 bool _ableRequest = false;
 bool _ableResponse = false;
 char* _ableData = 0;
@@ -77,6 +79,10 @@ void serverInit()
         return;
     }
 
+    if (!readUrl(GniusLaptop_Url, _gniusLaptopUrl)) {
+        return;
+    }
+
     _initialised = true;
 }
 
@@ -106,6 +112,9 @@ bool doRequest()
     if (_fr24Request) {
         curl_easy_setopt(_curl, CURLOPT_URL, _ableDisplayUrl);
     }
+    else if (_gniusRequest) {
+        curl_easy_setopt(_curl, CURLOPT_URL, _gniusLaptopUrl);
+    }
     else {
         curl_easy_setopt(_curl, CURLOPT_URL, _pilotAwareUrl);
     }
@@ -122,6 +131,9 @@ bool doRequest()
         char url[256];
         if (_fr24Request) {
             strcpy(url, _ableDisplayUrl);
+        }
+        else if (_fr24Request) {
+            strcpy(url, _gniusLaptopUrl);
         }
         else {
             strcpy(url, _pilotAwareUrl);

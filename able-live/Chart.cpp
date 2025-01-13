@@ -218,6 +218,7 @@ void initVars()
     _settings.framesPerSec = 0;
     _settings.tags = 2;
     _settings.addFlightradarData = true;
+    _settings.addGniusData = true;
     _settings.southernEnglandOnly = true;
     _settings.excludeHighAlt = false;
     _settings.keepBlackbusheZoomed = false;

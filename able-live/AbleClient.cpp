@@ -12,6 +12,7 @@
 // Externals
 extern bool _serverQuit;
 extern bool _fr24Request;
+extern bool _gniusRequest;
 extern bool _ableRequest;
 extern bool _ableResponse;
 extern char* _ableData;
@@ -502,8 +503,26 @@ bool GetLiveData()
         _ableResponse = false;
         strcpy(fr24Data, _ableData);
     }
-
     _fr24Request = false;
+
+    char gniusData[1024];
+    *gniusData = '\0';
+
+    if (_settings.addGniusData) {
+        _gniusRequest = true;
+        _ableRequest = true;
+
+        while (!_ableResponse) {
+            al_rest(0.02);
+            if (_serverQuit) {
+                return false;
+            }
+        }
+        _ableResponse = false;
+        strcpy(gniusData, _ableData);
+    }
+
+    _gniusRequest = false;
     _ableRequest = true;
 
     while (!_ableResponse) {
@@ -635,7 +654,6 @@ bool GetLiveData()
     }
 
     // Add in G-NIUS data
-    char* gniusData = getGniusData();
     pos = strchr(gniusData, '#');
     while (pos) {
         pos++;
