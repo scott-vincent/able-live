@@ -509,6 +509,7 @@ bool GetLiveData()
     *gniusData = '\0';
 
     if (_settings.addGniusData) {
+        *_ableData = '\0';
         _gniusRequest = true;
         _ableRequest = true;
 

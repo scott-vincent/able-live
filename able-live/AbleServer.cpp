@@ -132,7 +132,7 @@ bool doRequest()
         if (_fr24Request) {
             strcpy(url, _ableDisplayUrl);
         }
-        else if (_fr24Request) {
+        else if (_gniusRequest) {
             strcpy(url, _gniusLaptopUrl);
         }
         else {
