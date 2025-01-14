@@ -44,8 +44,9 @@ const int MaxScale = 200;
 
 // Externals
 extern bool _quit;
-extern bool _serverQuit;
-extern bool _ableResponse;
+extern bool _pilotAwareQuit = false;
+extern bool _fr24Quit = false;
+extern bool _gniusQuit = false;
 
 // Variables
 double DegreesToRadians = ALLEGRO_PI / 180.0f;
@@ -218,7 +219,6 @@ void initVars()
     _settings.framesPerSec = 0;
     _settings.tags = 2;
     _settings.addFlightradarData = true;
-    _settings.addGniusData = true;
     _settings.southernEnglandOnly = true;
     _settings.excludeHighAlt = false;
     _settings.keepBlackbusheZoomed = false;
@@ -1160,7 +1160,7 @@ void showChart()
     long lastFetch = 0;
     long lastSuccess = getMillis();
 
-    while (!_quit && !_serverQuit) {
+    while (!_quit && !_pilotAwareQuit && !_fr24Quit && !_gniusQuit) {
         al_wait_for_event(_eventQueue, &event);
 
         switch (event.type) {

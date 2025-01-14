@@ -10,12 +10,9 @@
 #include "ChartFile.h"
 
 // Externals
-extern bool _serverQuit;
-extern bool _fr24Request;
-extern bool _gniusRequest;
-extern bool _ableRequest;
-extern bool _ableResponse;
-extern char* _ableData;
+extern char* _pilotAwareData;
+extern char* _fr24Data;
+extern char* _gniusData;
 extern Settings _settings;
 extern AircraftDrawData _aircraft;
 extern bool _haveAble;
@@ -484,59 +481,9 @@ void writeAbleData()
 
 bool GetLiveData()
 {
-    if (_ableRequest || _ableResponse)
-        return true;
-
-    char fr24Data[1024];
-    *fr24Data = '\0';
-
-    if (_settings.addFlightradarData) {
-        _fr24Request = true;
-        _ableRequest = true;
-
-        while (!_ableResponse) {
-            al_rest(0.02);
-            if (_serverQuit) {
-                return false;
-            }
-        }
-        _ableResponse = false;
-        strcpy(fr24Data, _ableData);
-    }
-    _fr24Request = false;
-
-    char gniusData[1024];
-    *gniusData = '\0';
-
-    if (_settings.addGniusData) {
-        *_ableData = '\0';
-        _gniusRequest = true;
-        _ableRequest = true;
-
-        while (!_ableResponse) {
-            al_rest(0.02);
-            if (_serverQuit) {
-                return false;
-            }
-        }
-        _ableResponse = false;
-        strcpy(gniusData, _ableData);
-    }
-
-    _gniusRequest = false;
-    _ableRequest = true;
-
-    while (!_ableResponse) {
-        al_rest(0.02);
-        if (_serverQuit) {
-            return false;
-        }
-    }
-    _ableResponse = false;
-
-    char* pos = strstr(_ableData, "\"acList\":");
+    char* pos = strstr(_pilotAwareData, "\"acList\":");
     if (!pos) {
-        printf("Unexpected response: %s\n", _ableData);
+        //printf("Unexpected response: %s\n", _pilotAwareData);
         _minLoc.lat = BlackbusheLat - 0.05;
         _minLoc.lon = BlackbusheLon - 0.16;
         _maxLoc.lat = BlackbusheLat + 0.13;
@@ -644,7 +591,7 @@ bool GetLiveData()
 #endif
 
     // Add in FlightRadar data but only if Able num is completely missing
-    pos = strchr(fr24Data, '#');
+    pos = strchr(_fr24Data, '#');
     while (pos) {
         pos++;
         if (addAircraftData(pos, &_aircraftData[_aircraftCount])) {
@@ -655,7 +602,7 @@ bool GetLiveData()
     }
 
     // Add in G-NIUS data
-    pos = strchr(gniusData, '#');
+    pos = strchr(_gniusData, '#');
     while (pos) {
         pos++;
         if (addAircraftData(pos, &_aircraftData[_aircraftCount])) {

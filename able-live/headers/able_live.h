@@ -14,7 +14,7 @@ const char WriteDataFile[] = "/mem/pilotaware_data";    // Send PilotAware data 
 #endif
 const char PilotAware_Url[] = "../../pilotaware.uri";       // Fetch PilotAware data from ognpaw
 const char AbleDisplay_Url[] = "../../able-display.uri";    // Fetch FR24 data from AbleDisplay
-const char GniusLaptop_Url[] = "../../gnius-laptop.uri";    // Fetch G-NIUS data from G-NIUS Instructor Station
+const char Gnius_Host[] = "../../gnius.host";               // Fetch G-NIUS data from Simulator
 const int MaxAircraft = 256;
 const char ImagesDir[] = "resources/images";
 const char FontsDir[] = "resources/fonts";
@@ -108,7 +108,6 @@ struct Settings {
     char location[256];
     int tags;
     bool addFlightradarData;
-    bool addGniusData;
     bool southernEnglandOnly;
     bool excludeHighAlt;
     bool keepBlackbusheZoomed;

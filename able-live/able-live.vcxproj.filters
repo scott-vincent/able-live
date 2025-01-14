@@ -11,22 +11,28 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="able_live.cpp">
+    <ClCompile Include="src\AbleClient.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AbleClient.cpp">
+    <ClCompile Include="src\able_live.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AbleServer.cpp">
+    <ClCompile Include="src\Chart.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Chart.cpp">
+    <ClCompile Include="src\ChartCoords.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ChartCoords.cpp">
+    <ClCompile Include="src\ChartFile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ChartFile.cpp">
+    <ClCompile Include="src\PilotAwareFetch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\FR24Fetch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\GniusServer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

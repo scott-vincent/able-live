@@ -157,12 +157,14 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AbleClient.cpp" />
-    <ClCompile Include="AbleServer.cpp" />
-    <ClCompile Include="able_live.cpp" />
-    <ClCompile Include="Chart.cpp" />
-    <ClCompile Include="ChartCoords.cpp" />
-    <ClCompile Include="ChartFile.cpp" />
+    <ClCompile Include="src\AbleClient.cpp" />
+    <ClCompile Include="src\able_live.cpp" />
+    <ClCompile Include="src\Chart.cpp" />
+    <ClCompile Include="src\ChartCoords.cpp" />
+    <ClCompile Include="src\ChartFile.cpp" />
+    <ClCompile Include="src\FR24Fetch.cpp" />
+    <ClCompile Include="src\GniusServer.cpp" />
+    <ClCompile Include="src\PilotAwareFetch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="headers\AbleClient.h" />

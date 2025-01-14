@@ -5,25 +5,17 @@
 #include <sys/stat.h>
 #endif
 #include <iostream>
-#include <thread>
 #include <curl/curl.h>
 #include "able_live.h"
-#include "AbleClient.h"
 #include "ChartFile.h"
 
 // Externals
 extern bool _quit;
-extern bool _serverQuit;
+extern bool _fr24Quit;
 
 // Variables
-char _pilotAwareUrl[256];
 char _ableDisplayUrl[256];
-char _gniusLaptopUrl[256];
-bool _fr24Request = false;
-bool _gniusRequest = false;
-bool _ableRequest = false;
-bool _ableResponse = false;
-char* _ableData = 0;
+char* _fr24Data = 0;
 size_t _dataSize = 0;
 bool _initialised = false;
 CURL* _curl = NULL;
@@ -57,7 +49,7 @@ size_t curlWrite(void* inData, size_t size, size_t inSize, void* userdata)
     return inSize;
 }
 
-void serverInit()
+void fetchInit()
 {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     _curl = curl_easy_init();
@@ -67,29 +59,21 @@ void serverInit()
         return;
     }
 
-    curl_easy_setopt(_curl, CURLOPT_WRITEDATA, &_ableData);
+    curl_easy_setopt(_curl, CURLOPT_WRITEDATA, &_fr24Data);
     curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, &curlWrite);
 
-    // Get URLs
-    if (!readUrl(PilotAware_Url, _pilotAwareUrl)) {
-        return;
-    }
-
+    // Get URL
     if (!readUrl(AbleDisplay_Url, _ableDisplayUrl)) {
-        return;
-    }
-
-    if (!readUrl(GniusLaptop_Url, _gniusLaptopUrl)) {
         return;
     }
 
     _initialised = true;
 }
 
-void serverCleanUp()
+void fetchCleanUp()
 {
-    if (_ableData) {
-        free(_ableData);
+    if (_fr24Data) {
+        free(_fr24Data);
     }
 
     if (_curl != NULL) {
@@ -97,8 +81,8 @@ void serverCleanUp()
     }
     curl_global_cleanup();
 
-    printf("Exiting\n");
-    _serverQuit = true;
+    printf("FR24 Fetch exiting\n");
+    _fr24Quit = true;
     _quit = true;
 }
 
@@ -109,80 +93,51 @@ bool doRequest()
         return false;
     }
 
-    if (_fr24Request) {
-        curl_easy_setopt(_curl, CURLOPT_URL, _ableDisplayUrl);
-    }
-    else if (_gniusRequest) {
-        curl_easy_setopt(_curl, CURLOPT_URL, _gniusLaptopUrl);
-    }
-    else {
-        curl_easy_setopt(_curl, CURLOPT_URL, _pilotAwareUrl);
+    curl_easy_setopt(_curl, CURLOPT_URL, _ableDisplayUrl);
+
+    if (_fr24Data) {
+        free(_fr24Data);
     }
 
-    if (_ableData) {
-        free(_ableData);
-    }
-
-    _ableData = 0;
+    _fr24Data = 0;
     _dataSize = 0;
 
     CURLcode res = curl_easy_perform(_curl);
     if (res != CURLE_OK) {
-        char url[256];
-        if (_fr24Request) {
-            strcpy(url, _ableDisplayUrl);
-        }
-        else if (_gniusRequest) {
-            strcpy(url, _gniusLaptopUrl);
-        }
-        else {
-            strcpy(url, _pilotAwareUrl);
-        }
-        fprintf(stderr, "Request failed (%s): %s\n", url, curl_easy_strerror(res));
+        fprintf(stderr, "Request failed (%s): %s\n", _ableDisplayUrl, curl_easy_strerror(res));
         return false;
     }
 
     return true;
 }
 
-void ableRequest()
+void fetchRequest()
 {
     if (!doRequest()) {
-        if (_ableData) {
-            free(_ableData);
+        if (_fr24Data) {
+            free(_fr24Data);
         }
-        _ableData = (char*)malloc(2);
-        if (_ableData) {
-            *_ableData = '\0';
+        _fr24Data = (char*)malloc(2);
+        if (_fr24Data) {
+            *_fr24Data = '\0';
         }
-        _ableResponse = true;
         return;
     }
-
-    _ableResponse = true;
 }
 
-void ableServer()
+void fr24Fetch()
 {
-    serverInit();
+    fetchInit();
     if (!_initialised) {
-        serverCleanUp();
+        fetchCleanUp();
         return;
     }
 
     while (!_quit)
     {
-        if (_ableRequest) {
-            ableRequest();
-            _ableRequest = false;
-        }
-
-#ifdef _WINDOWS
-        Sleep(50);
-#else
-        usleep(50000);
-#endif
+        fetchRequest();
+        milliSleep(500);
     }
 
-    serverCleanUp();
+    fetchCleanUp();
 }
