@@ -12,6 +12,3 @@ g++ -o able-live -I . -I headers \
     -lpthread -lcurl -lallegro -lallegro_primitives -lallegro_image -lallegro_font -lallegro_ttf -lallegro_dialog || exit
 strip able-live
 echo Done
-
-AbleClient.cpp  ChartCoords.cpp  ChartFile.cpp  GniusServer.cpp
-able_live.cpp   Chart.cpp        FR24Fetch.cpp  PilotAwareFetch.cpp
