@@ -1,12 +1,17 @@
 echo Building able-live
 cd able-live
 g++ -o able-live -I . -I headers \
-    AbleClient.cpp \
-    AbleServer.cpp \
-    able_live.cpp \
-    ChartCoords.cpp \
-    Chart.cpp \
-    ChartFile.cpp \
+    src/able_live.cpp \
+    src/AbleClient.cpp \
+    src/ChartCoords.cpp \
+    src/Chart.cpp \
+    src/ChartFile.cpp \
+    src/PilotAwareFetch.cpp \
+    src/FR24Fetch.cpp \
+    src/GniusServer.cpp \
     -lpthread -lcurl -lallegro -lallegro_primitives -lallegro_image -lallegro_font -lallegro_ttf -lallegro_dialog || exit
 strip able-live
 echo Done
+
+AbleClient.cpp  ChartCoords.cpp  ChartFile.cpp  GniusServer.cpp
+able_live.cpp   Chart.cpp        FR24Fetch.cpp  PilotAwareFetch.cpp
