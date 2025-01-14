@@ -16,12 +16,12 @@ extern bool _pilotAwareQuit;
 // Variables
 char _pilotAwareUrl[256];
 char* _pilotAwareData = 0;
-size_t _dataSize = 0;
-bool _initialised = false;
-CURL* _curl = NULL;
+static size_t _dataSize = 0;
+static bool _initialised = false;
+static CURL* _curl = NULL;
 
 
-size_t curlWrite(void* inData, size_t size, size_t inSize, void* userdata)
+static size_t curlWrite(void* inData, size_t size, size_t inSize, void* userdata)
 {
     char** toData = (char**)userdata;
     const char* input = (const char*)inData;
@@ -49,7 +49,7 @@ size_t curlWrite(void* inData, size_t size, size_t inSize, void* userdata)
     return inSize;
 }
 
-void fetchInit()
+static void fetchInit()
 {
     curl_global_init(CURL_GLOBAL_DEFAULT);
     _curl = curl_easy_init();
@@ -70,7 +70,7 @@ void fetchInit()
     _initialised = true;
 }
 
-void fetchCleanUp()
+static void fetchCleanUp()
 {
     if (_pilotAwareData) {
         free(_pilotAwareData);
@@ -86,7 +86,7 @@ void fetchCleanUp()
     _quit = true;
 }
 
-bool doRequest()
+static bool doRequest()
 {
     if (!_initialised) {
         fprintf(stderr, "Request failed as not initialised");
@@ -111,7 +111,7 @@ bool doRequest()
     return true;
 }
 
-void fetchRequest()
+static void fetchRequest()
 {
     if (!doRequest()) {
         if (_pilotAwareData) {

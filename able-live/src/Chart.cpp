@@ -44,9 +44,9 @@ const int MaxScale = 200;
 
 // Externals
 extern bool _quit;
-extern bool _pilotAwareQuit = false;
-extern bool _fr24Quit = false;
-extern bool _gniusQuit = false;
+extern bool _pilotAwareQuit;
+extern bool _fr24Quit;
+extern bool _gniusQuit;
 
 // Variables
 double DegreesToRadians = ALLEGRO_PI / 180.0f;

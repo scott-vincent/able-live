@@ -2,6 +2,7 @@
 #ifdef _WINDOWS
 #include <windows.h>
 #endif
+#include "able_live.h"
 
 void saveSettings();
 void loadSettings();

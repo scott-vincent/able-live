@@ -15,11 +15,11 @@ extern bool _gniusQuit;
 // Variables
 char _gniusHost[256];
 char* _gniusData = 0;
-size_t _dataSize = 0;
-bool _initialised = false;
+static size_t _dataSize = 0;
+static bool _initialised = false;
 
 
-void serverInit()
+static void serverInit()
 {
     // Get URL
     if (!readUrl(Gnius_Host, _gniusHost)) {
@@ -31,7 +31,7 @@ void serverInit()
     _initialised = true;
 }
 
-void serverCleanUp()
+static void serverCleanUp()
 {
     if (_gniusData) {
         free(_gniusData);

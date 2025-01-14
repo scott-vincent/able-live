@@ -8,7 +8,7 @@
 #include <thread>
 #include "ChartFile.h"
 
-const char* versionString = "v1.0.3";
+const char* versionString = "v1.1.0";
 bool _quit = false;
 bool _pilotAwareQuit = false;
 bool _fr24Quit = false;

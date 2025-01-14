@@ -216,6 +216,6 @@ void milliSleep(int milliSecs)
 #ifdef _WINDOWS
     Sleep(milliSecs);
 #else
-    usleep(millSecs * 1000);
+    usleep(milliSecs * 1000);
 #endif
 }
