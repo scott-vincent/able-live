@@ -1,5 +1,6 @@
 #ifdef _WINDOWS
 #include <windows.h>
+typedef int socklen_t;
 #else
 #include <unistd.h>
 #include <sys/stat.h>
@@ -60,7 +61,12 @@ static void serverInit()
     addr.sin_port = htons(Port);
 
     if (bind(sockfd, (sockaddr*)&addr, sizeof(addr)) == SOCKET_ERROR) {
-        printf("Server failed to bind to localhost port %d: %ld\n", Port, WSAGetLastError());
+#ifdef _WINDOWS
+        int error = WSAGetLastError();
+#else
+        int error = errno;
+#endif
+        printf("Server failed to bind to localhost port %d: %ld\n", Port, error);
         return;
     }
 
@@ -110,9 +116,13 @@ void gniusServer()
         // Wait for Simulator to send data (non-blocking, 2 second timeout)
         int sel = select(FD_SETSIZE, &fds, 0, 0, &timeout);
         if (sel > 0) {
-            bytes = recvfrom(sockfd, newGniusData, MaxGniusData, 0, (SOCKADDR*)&senderAddr, &addrSize);
+            bytes = recvfrom(sockfd, newGniusData, MaxGniusData, 0, (SOCKADDR*)&senderAddr, (socklen_t*)&addrSize);
             if (bytes == -1) {
+#ifdef _WINDOWS
                 int error = WSAGetLastError();
+#else
+                int error = errno;
+#endif
                 if (error == 10040) {
                     printf("Received more than %d bytes from %s (WSAError = %d)\n", MaxGniusData, inet_ntoa(senderAddr.sin_addr), error);
                 }
