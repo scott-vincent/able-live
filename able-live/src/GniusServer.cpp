@@ -3,6 +3,14 @@
 #else
 #include <unistd.h>
 #include <sys/stat.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
+typedef int SOCKET;
+#define SOCKET_ERROR -1
+#define INVALID_SOCKET -1
+#define SOCKADDR sockaddr
+#define closesocket close
 #endif
 #include <iostream>
 #include "able_live.h"
@@ -64,6 +72,10 @@ static void serverInit()
 static void serverCleanUp()
 {
     closesocket(sockfd);
+
+#ifdef _WINDOWS
+    WSACleanup();
+#endif
 
     printf("G-NIUS Server exiting\n");
     _gniusQuit = true;
