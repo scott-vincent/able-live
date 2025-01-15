@@ -49,6 +49,7 @@ static void serverInit()
     // Create a UDP socket
     if ((sockfd = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == INVALID_SOCKET) {
         printf("Server failed to create UDP socket\n");
+        fflush(stdout);
         return;
     }
 
@@ -67,10 +68,12 @@ static void serverInit()
         int error = errno;
 #endif
         printf("Server failed to bind to localhost port %d: %ld\n", Port, error);
+        fflush(stdout);
         return;
     }
 
     printf("G-NIUS Server listening on port %d\n", Port);
+    fflush(stdout);
 
     _initialised = true;
 }
@@ -97,13 +100,15 @@ void gniusServer()
     }
 
     timeval timeout;
-    timeout.tv_sec = 2;
-    timeout.tv_usec = 0;
 
     while (!_quit) {
         fd_set fds;
         FD_ZERO(&fds);
         FD_SET(sockfd, &fds);
+
+        // Timeout needs to be set every time on Linux!
+        timeout.tv_sec = 2;
+        timeout.tv_usec = 0;
 
         char* newGniusData;
         if (_gniusData == _gniusData1) {
@@ -129,12 +134,14 @@ void gniusServer()
                 else {
                     printf("Received from %s but WSAError = %d\n", inet_ntoa(senderAddr.sin_addr), error);
                 }
+		fflush(stdout);
             }
             else {
                 //printf("Received %d bytes of G-NIUS data from %s\n", bytes, inet_ntoa(senderAddr.sin_addr));
                 newGniusData[bytes] = '\0';
                 _gniusData = newGniusData;
                 //printf("Got gnius data: %s\n", _gniusData);
+                //fflush(stdout);
                 failures = 0;
             }
         }
@@ -149,7 +156,8 @@ void gniusServer()
                 failures = 99;
             }
             else {
-                //printf("Wait for gnius data (%d)\n", failures);
+                printf("Wait for gnius data (%d)\n", failures);
+		fflush(stdout);
             }
         }
     }
