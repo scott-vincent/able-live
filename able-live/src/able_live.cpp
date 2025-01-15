@@ -15,6 +15,19 @@ bool _fr24Quit = false;
 bool _gniusQuit = false;
 char _moduleFilename[256];
 
+// Data must be double buffered
+char* _pilotAwareData;
+char _pilotAwareData1[MaxPilotAwareData];
+char _pilotAwareData2[MaxPilotAwareData];
+
+char* _fr24Data;
+char _fr24Data1[MaxFr24Data];
+char _fr24Data2[MaxFr24Data];
+
+char* _gniusData;
+char _gniusData1[MaxGniusData];
+char _gniusData2[MaxGniusData];
+
 void pilotAwareFetch();
 void fr24Fetch();
 void gniusServer();
@@ -27,17 +40,26 @@ int main(int argc, char **argv)
 
     strcpy(_moduleFilename, argv[0]);
 
+    *_pilotAwareData1 = '\0';
+    _pilotAwareData = _pilotAwareData1;
+
+    *_fr24Data1 = '\0';
+    _fr24Data = _fr24Data1;
+
+    *_gniusData1 = '\0';
+    _gniusData = _gniusData1;
+
     // Start the PilotAware thread
     std::thread pilotAwareThread(pilotAwareFetch);
-    milliSleep(125);
+    milliSleep(100);
 
     // Start the FR24 thread
     std::thread fr24Thread(fr24Fetch);
-    milliSleep(125);
+    milliSleep(100);
 
     // Start the G-NIUS server
     std::thread gniusThread(gniusServer);
-    milliSleep(125);
+    milliSleep(100);
 
     showChart();
 

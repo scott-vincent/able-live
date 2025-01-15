@@ -12,38 +12,34 @@
 // Externals
 extern bool _quit;
 extern bool _pilotAwareQuit;
+extern char* _pilotAwareData;
+extern char _pilotAwareData1[MaxPilotAwareData];
+extern char _pilotAwareData2[MaxPilotAwareData];
 
 // Variables
 char _pilotAwareUrl[256];
-char* _pilotAwareData = 0;
 static size_t _dataSize = 0;
 static bool _initialised = false;
 static CURL* _curl = NULL;
+static int failures = 0;
 
 
 static size_t curlWrite(void* inData, size_t size, size_t inSize, void* userdata)
 {
-    char** toData = (char**)userdata;
+    char* toData = (char*)userdata;
     const char* input = (const char*)inData;
     if (inSize == 0) {
         return 0;
     }
 
-    if (!*toData) {
-        *toData = (char*)malloc(inSize + 1);
+    int newSize = _dataSize + inSize;
+    if (newSize < MaxPilotAwareData) {
+        memcpy(toData + _dataSize, input, inSize);
+        toData[newSize] = '\0';
+        _dataSize = newSize;
     }
     else {
-        #pragma warning(suppress: 6308)
-        *toData = (char*)realloc(*toData, _dataSize + inSize + 1);
-    }
-
-    if (*toData) {
-        memcpy(*toData + _dataSize, input, inSize);
-        _dataSize += inSize;
-        (*toData)[_dataSize] = '\0';
-    }
-    else {
-        printf("Failed to allocate memory for curl response");
+        printf("Buffer too small for pilotAware data: %d\n", newSize);
     }
 
     return inSize;
@@ -59,7 +55,6 @@ static void fetchInit()
         return;
     }
 
-    curl_easy_setopt(_curl, CURLOPT_WRITEDATA, &_pilotAwareData);
     curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, &curlWrite);
 
     // Get URL
@@ -72,10 +67,6 @@ static void fetchInit()
 
 static void fetchCleanUp()
 {
-    if (_pilotAwareData) {
-        free(_pilotAwareData);
-    }
-
     if (_curl != NULL) {
         curl_easy_cleanup(_curl);
     }
@@ -93,36 +84,26 @@ static bool doRequest()
         return false;
     }
 
-    curl_easy_setopt(_curl, CURLOPT_URL, _pilotAwareUrl);
-
-    if (_pilotAwareData) {
-        free(_pilotAwareData);
+    char* newPilotAwareData;
+    if (_pilotAwareData == _pilotAwareData1) {
+        newPilotAwareData = _pilotAwareData2;
+    }
+    else {
+        newPilotAwareData = _pilotAwareData1;
     }
 
-    _pilotAwareData = 0;
-    _dataSize = 0;
+    curl_easy_setopt(_curl, CURLOPT_URL, _pilotAwareUrl);
+    curl_easy_setopt(_curl, CURLOPT_WRITEDATA, newPilotAwareData);
 
+    _dataSize = 0;
     CURLcode res = curl_easy_perform(_curl);
     if (res != CURLE_OK) {
-        fprintf(stderr, "Request failed (%s): %s\n", _pilotAwareUrl, curl_easy_strerror(res));
+        fprintf(stderr, "Fetch PilotAware data failed: %s\n", curl_easy_strerror(res));
         return false;
     }
 
+    _pilotAwareData = newPilotAwareData;
     return true;
-}
-
-static void fetchRequest()
-{
-    if (!doRequest()) {
-        if (_pilotAwareData) {
-            free(_pilotAwareData);
-        }
-        _pilotAwareData = (char*)malloc(2);
-        if (_pilotAwareData) {
-            *_pilotAwareData = '\0';
-        }
-        return;
-    }
 }
 
 void pilotAwareFetch()
@@ -135,8 +116,22 @@ void pilotAwareFetch()
 
     while (!_quit)
     {
-        fetchRequest();
-        milliSleep(500);
+        if (doRequest()) {
+            //printf("Got pilotAware data (%lld bytes)\n", strlen(_pilotAwareData));
+            failures = 0;
+        }
+        else {
+            failures++;
+            if (failures > 3) {
+                *_pilotAwareData = '\0';
+                failures = 99;
+            }
+            else {
+                printf("Wait for pilotAware data (%d)\n", failures);
+            }
+        }
+
+        milliSleep(1000);
     }
 
     fetchCleanUp();

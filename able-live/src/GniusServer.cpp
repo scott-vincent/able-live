@@ -9,15 +9,16 @@
 #include "ChartFile.h"
 
 const int Port = 53020;
-const int MaxDataSize = 1024;
 
 // Externals
 extern bool _quit;
 extern bool _gniusQuit;
 
 // Variables
-char* _gniusData = 0;
-static size_t _dataSize = 0;
+extern char* _gniusData;
+extern char _gniusData1[MaxGniusData];
+extern char _gniusData2[MaxGniusData];
+
 static bool _initialised = false;
 static SOCKET sockfd;
 static sockaddr_in senderAddr;
@@ -57,16 +58,11 @@ static void serverInit()
 
     printf("G-NIUS Server listening on port %d\n", Port);
 
-    _gniusData = (char*)malloc(MaxDataSize);
     _initialised = true;
 }
 
 static void serverCleanUp()
 {
-    if (_gniusData) {
-        free(_gniusData);
-    }
-
     closesocket(sockfd);
 
     printf("G-NIUS Server exiting\n");
@@ -83,28 +79,40 @@ void gniusServer()
     }
 
     timeval timeout;
-    timeout.tv_sec = 0;
-    timeout.tv_usec = 500000;
+    timeout.tv_sec = 2;
+    timeout.tv_usec = 0;
 
     while (!_quit) {
         fd_set fds;
         FD_ZERO(&fds);
         FD_SET(sockfd, &fds);
 
-        // Wait for Simulator to send data (non-blocking, 0.5 second timeout)
+        char* newGniusData;
+        if (_gniusData == _gniusData1) {
+            newGniusData = _gniusData2;
+        }
+        else {
+            newGniusData = _gniusData1;
+        }
+
+        // Wait for Simulator to send data (non-blocking, 2 second timeout)
         int sel = select(FD_SETSIZE, &fds, 0, 0, &timeout);
         if (sel > 0) {
-            bytes = recvfrom(sockfd, (char*)&_gniusData, MaxDataSize, 0, (SOCKADDR*)&senderAddr, &addrSize);
+            bytes = recvfrom(sockfd, newGniusData, MaxGniusData, 0, (SOCKADDR*)&senderAddr, &addrSize);
             if (bytes == -1) {
                 int error = WSAGetLastError();
                 if (error == 10040) {
-                    printf("Received more than %d bytes from %s (WSAError = %d)\n", MaxDataSize, inet_ntoa(senderAddr.sin_addr), error);
+                    printf("Received more than %d bytes from %s (WSAError = %d)\n", MaxGniusData, inet_ntoa(senderAddr.sin_addr), error);
                 }
                 else {
                     printf("Received from %s but WSAError = %d\n", inet_ntoa(senderAddr.sin_addr), error);
                 }
             }
             else {
+                //printf("Received %d bytes of G-NIUS data from %s\n", bytes, inet_ntoa(senderAddr.sin_addr));
+                newGniusData[bytes] = '\0';
+                _gniusData = newGniusData;
+                //printf("Got gnius data: %s\n", _gniusData);
                 failures = 0;
             }
         }
@@ -114,9 +122,12 @@ void gniusServer()
 
         if (bytes == SOCKET_ERROR) {
             failures++;
-            if (failures > 2) {
+            if (failures > 1) {
                 *_gniusData = '\0';
                 failures = 99;
+            }
+            else {
+                //printf("Wait for gnius data (%d)\n", failures);
             }
         }
     }

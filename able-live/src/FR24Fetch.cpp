@@ -12,38 +12,34 @@
 // Externals
 extern bool _quit;
 extern bool _fr24Quit;
+extern char* _fr24Data;
+extern char _fr24Data1[MaxFr24Data];
+extern char _fr24Data2[MaxFr24Data];
 
 // Variables
 char _ableDisplayUrl[256];
-char* _fr24Data = 0;
 static size_t _dataSize = 0;
 static bool _initialised = false;
 static CURL* _curl = NULL;
+static int failures = 0;
 
 
 static size_t curlWrite(void* inData, size_t size, size_t inSize, void* userdata)
 {
-    char** toData = (char**)userdata;
+    char* toData = (char*)userdata;
     const char* input = (const char*)inData;
     if (inSize == 0) {
         return 0;
     }
 
-    if (!*toData) {
-        *toData = (char*)malloc(inSize + 1);
+    int newSize = _dataSize + inSize;
+    if (newSize < MaxFr24Data) {
+        memcpy(toData + _dataSize, input, inSize);
+        toData[newSize] = '\0';
+        _dataSize = newSize;
     }
     else {
-        #pragma warning(suppress: 6308)
-        *toData = (char*)realloc(*toData, _dataSize + inSize + 1);
-    }
-
-    if (*toData) {
-        memcpy(*toData + _dataSize, input, inSize);
-        _dataSize += inSize;
-        (*toData)[_dataSize] = '\0';
-    }
-    else {
-        printf("Failed to allocate memory for curl response");
+        printf("Buffer too small for fr24 data: %d\n", newSize);
     }
 
     return inSize;
@@ -59,7 +55,6 @@ static void fetchInit()
         return;
     }
 
-    curl_easy_setopt(_curl, CURLOPT_WRITEDATA, &_fr24Data);
     curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, &curlWrite);
 
     // Get URL
@@ -72,10 +67,6 @@ static void fetchInit()
 
 static void fetchCleanUp()
 {
-    if (_fr24Data) {
-        free(_fr24Data);
-    }
-
     if (_curl != NULL) {
         curl_easy_cleanup(_curl);
     }
@@ -93,36 +84,26 @@ static bool doRequest()
         return false;
     }
 
-    curl_easy_setopt(_curl, CURLOPT_URL, _ableDisplayUrl);
-
-    if (_fr24Data) {
-        free(_fr24Data);
+    char* newFr24Data;
+    if (_fr24Data == _fr24Data1) {
+        newFr24Data = _fr24Data2;
+    }
+    else {
+        newFr24Data = _fr24Data1;
     }
 
-    _fr24Data = 0;
-    _dataSize = 0;
+    curl_easy_setopt(_curl, CURLOPT_URL, _ableDisplayUrl);
+    curl_easy_setopt(_curl, CURLOPT_WRITEDATA, newFr24Data);
 
+    _dataSize = 0;
     CURLcode res = curl_easy_perform(_curl);
     if (res != CURLE_OK) {
-        fprintf(stderr, "Request failed (%s): %s\n", _ableDisplayUrl, curl_easy_strerror(res));
+        fprintf(stderr, "Fetch FR24 data failed: %s\n", curl_easy_strerror(res));
         return false;
     }
 
+    _fr24Data = newFr24Data;
     return true;
-}
-
-static void fetchRequest()
-{
-    if (!doRequest()) {
-        if (_fr24Data) {
-            free(_fr24Data);
-        }
-        _fr24Data = (char*)malloc(2);
-        if (_fr24Data) {
-            *_fr24Data = '\0';
-        }
-        return;
-    }
 }
 
 void fr24Fetch()
@@ -135,8 +116,22 @@ void fr24Fetch()
 
     while (!_quit)
     {
-        fetchRequest();
-        milliSleep(500);
+        if (doRequest()) {
+            //printf("Got fr24 data (%lld bytes)\n", strlen(_fr24Data));
+            failures = 0;
+        }
+        else {
+            failures++;
+            if (failures > 3) {
+                *_fr24Data = '\0';
+                failures = 99;
+            }
+            else {
+                printf("Wait for fr24 data (%d)\n", failures);
+            }
+        }
+
+        milliSleep(1000);
     }
 
     fetchCleanUp();
