@@ -134,7 +134,7 @@ void gniusServer()
                 else {
                     printf("Received from %s but WSAError = %d\n", inet_ntoa(senderAddr.sin_addr), error);
                 }
-		fflush(stdout);
+                fflush(stdout);
             }
             else {
                 //printf("Received %d bytes of G-NIUS data from %s\n", bytes, inet_ntoa(senderAddr.sin_addr));
@@ -157,7 +157,7 @@ void gniusServer()
             }
             else {
                 printf("Wait for gnius data (%d)\n", failures);
-		fflush(stdout);
+                fflush(stdout);
             }
         }
     }
