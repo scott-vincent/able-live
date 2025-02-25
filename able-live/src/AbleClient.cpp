@@ -517,7 +517,7 @@ bool GetLiveData()
     _aircraftCount = 0;
     _haveAble = false;
 
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < MaxAble; i++) {
         haveAbleNum[i] = false;
     }
 
@@ -638,7 +638,7 @@ bool GetLiveData()
     }
 
     // G-NIUS aircraft stale after 3 seconds
-    for (int i = 14; i < 16; i++) {
+    for (int i = 16; i < MaxAble; i++) {
         if (!haveAbleNum[i] && _ableTrail[i].count > 0 && now - _ableTrail[i].lastUpdate > 2) {
             _ableTrail[i].count = 0;
         }

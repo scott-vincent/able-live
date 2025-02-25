@@ -956,7 +956,7 @@ void render()
 #endif
 
     if (_haveAble) {
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < MaxAble; i++) {
             if (_ableTrail[i].count > 0) {
                 drawTrail(&_ableTrail[i], i);
             }
@@ -964,16 +964,16 @@ void render()
     }
 
 #ifdef COLOUR_DEBUG
-    _ableTrail[15].count = 2;
-    _ableTrail[15].loc[0].lon = -1.0;
-    _ableTrail[15].loc[1].lon = -0.5;
+    _ableTrail[17].count = 2;
+    _ableTrail[17].loc[0].lon = -1.0;
+    _ableTrail[17].loc[1].lon = -0.5;
 
-    for (int i = 0; i < 16; i++) {
-        _ableTrail[15].loc[0].lat = 51.45 - i * 0.01;
-        _ableTrail[15].loc[1].lat = _ableTrail[15].loc[0].lat;
+    for (int i = 0; i < MaxAble; i++) {
+        _ableTrail[17].loc[0].lat = 51.45 - i * 0.01;
+        _ableTrail[17].loc[1].lat = _ableTrail[15].loc[0].lat;
         drawTrail(&_ableTrail[15], i);
     }
-    _ableTrail[15].count = 0;
+    _ableTrail[17].count = 0;
 #endif
 
     for (int i = 0; i < _aircraftCount; i++) {
