@@ -21,13 +21,13 @@ extern Locn _maxLoc;
 extern PosData _aircraftData[MaxAircraft];
 extern int _aircraftCount;
 extern char _prevAbleData[36];
-extern Trail _ableTrail[16];
+extern Trail _ableTrail[MaxAble];
 
 // Variables
 Locn minAbleLoc;
 Locn maxAbleLoc;
-bool haveAbleNum[16];
-int ableAlt[16];
+bool haveAbleNum[MaxAble];
+int ableAlt[MaxAble];
 
 PosData me;
 Locn meLoc[256];
@@ -294,7 +294,7 @@ bool addMe()
 bool addAircraftData(char* pos, PosData* posData)
 {
     int num = atoi(pos);
-    if (num < 1 || num > 16) {
+    if (num < 1 || num > 20) {
         printf("addAircraftData: Bad data (num out of range): %s\n", pos);
         return false;
     }
@@ -337,12 +337,20 @@ bool addAircraftData(char* pos, PosData* posData)
 
     posData->id = -1;
 
-    if (num == 15) {
+    if (num == 17) {
         strcpy(posData->callsign, "G-NIUS");
         posData->bmp = _aircraft.Gnius;
     }
-    else if (num == 16) {
+    else if (num == 18) {
         strcpy(posData->callsign, "G-NIAI");
+        posData->bmp = _aircraft.Gnius;
+    }
+    else if (num == 19) {
+        strcpy(posData->callsign, "G-MOBL");
+        posData->bmp = _aircraft.Gnius;
+    }
+    else if (num == 20) {
+        strcpy(posData->callsign, "G-MOAI");
         posData->bmp = _aircraft.Gnius;
     }
     else {
@@ -381,17 +389,25 @@ void updateArea()
 {
     bool isGnius = strncmp(_aircraftData[_aircraftCount].callsign, "G-NIUS", 6) == 0;
     bool isGniai = strncmp(_aircraftData[_aircraftCount].callsign, "G-NIAI", 6) == 0;
+    bool isMobl = strncmp(_aircraftData[_aircraftCount].callsign, "G-MOBL", 6) == 0;
+    bool isMoai = strncmp(_aircraftData[_aircraftCount].callsign, "G-MOAI", 6) == 0;
 
-    if (strncmp(_aircraftData[_aircraftCount].callsign, "ABLE", 4) == 0 || isGnius || isGniai) {
+    if (strncmp(_aircraftData[_aircraftCount].callsign, "ABLE", 4) == 0 || isGnius || isGniai || isMobl || isMoai) {
         _aircraftData[_aircraftCount].isAble = true;
         _haveAble = true;
 
         int num;
         if (isGnius) {
-            num = 15;
+            num = 17;
         }
         else if (isGniai) {
-            num = 16;
+            num = 18;
+        }
+        else if (isMobl) {
+            num = 19;
+        }
+        else if (isMoai) {
+            num = 20;
         }
         else {
             num = atoi(&_aircraftData[_aircraftCount].callsign[4]);

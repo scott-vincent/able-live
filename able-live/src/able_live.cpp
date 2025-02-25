@@ -27,6 +27,7 @@ char _fr24Data2[MaxFr24Data];
 char* _gniusData;
 char _gniusData1[MaxGniusData];
 char _gniusData2[MaxGniusData];
+char _gniusData3[MaxGniusData];
 
 void pilotAwareFetch();
 void fr24Fetch();

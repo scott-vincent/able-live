@@ -38,7 +38,6 @@ const char AircraftMilitaryJet[] = "resources/images/military_jet.png";
 const char AircraftMilitaryTurboprop[] = "resources/images/military_turboprop.png";
 const char AircraftMilitaryHeli[] = "resources/images/military_heli.png";
 
-const int MaxAble = 14;
 const int MinScale = 5;
 const int MaxScale = 200;
 
@@ -78,8 +77,8 @@ bool _mouseHidden = false;
 PosData _aircraftData[MaxAircraft];
 int _aircraftCount = 0;
 bool _haveAble = false;
-Trail _ableTrail[16];
-ALLEGRO_COLOR ableColour[16];
+Trail _ableTrail[MaxAble];
+ALLEGRO_COLOR ableColour[MaxAble];
 Locn _minLoc;
 Locn _maxLoc;
 Locn _origMinLoc;
@@ -242,7 +241,7 @@ void initVars()
 
     *_prevAbleData = '\0';
 
-    for (int i = 0; i < 16; i++) {
+    for (int i = 0; i < MaxAble; i++) {
         _ableTrail[i].count = 0;
     }
 
@@ -262,6 +261,10 @@ void initVars()
     ableColour[13] = al_map_rgb(0xa8, 0x52, 0xff);
     ableColour[14] = al_map_rgb(0x52, 0xff, 0xff);
     ableColour[15] = al_map_rgb(0xff, 0x52, 0x93);
+    ableColour[16] = al_map_rgb(0x52, 0xff, 0xff);
+    ableColour[17] = al_map_rgb(0xff, 0x52, 0x93);
+    ableColour[18] = al_map_rgb(0x52, 0x7d, 0xff);
+    ableColour[19] = al_map_rgb(0xa8, 0x52, 0xff);
 }
 
 void cleanupTags()

@@ -27,6 +27,7 @@ extern bool _gniusQuit;
 extern char* _gniusData;
 extern char _gniusData1[MaxGniusData];
 extern char _gniusData2[MaxGniusData];
+extern char _gniusData3[MaxGniusData];
 
 static bool _initialised = false;
 static SOCKET sockfd;
@@ -113,6 +114,9 @@ void gniusServer()
         char* newGniusData;
         if (_gniusData == _gniusData1) {
             newGniusData = _gniusData2;
+        }
+        else if (_gniusData == _gniusData2) {
+            newGniusData = _gniusData3;
         }
         else {
             newGniusData = _gniusData1;

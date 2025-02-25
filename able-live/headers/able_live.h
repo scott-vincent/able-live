@@ -18,6 +18,7 @@ const int MaxPilotAwareData = 262144;
 const int MaxFr24Data = 512;
 const int MaxGniusData = 512;
 const int MaxAircraft = 256;
+const int MaxAble = 20;
 const char ImagesDir[] = "resources/images";
 const char FontsDir[] = "resources/fonts";
 const char SmallChart[] = "resources/maps/Small.png";
