@@ -27,7 +27,9 @@ char _fr24Data2[MaxFr24Data];
 char* _gniusData;
 char _gniusData1[MaxGniusData];
 char _gniusData2[MaxGniusData];
-char _gniusData3[MaxGniusData];
+char* _mobileData;
+char _mobileData1[MaxGniusData];
+char _mobileData2[MaxGniusData];
 
 void pilotAwareFetch();
 void fr24Fetch();
@@ -49,6 +51,9 @@ int main(int argc, char **argv)
 
     *_gniusData1 = '\0';
     _gniusData = _gniusData1;
+
+    *_mobileData1 = '\0';
+    _mobileData = _gniusData1;
 
     // Start the PilotAware thread
     std::thread pilotAwareThread(pilotAwareFetch);

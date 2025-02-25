@@ -27,7 +27,9 @@ extern bool _gniusQuit;
 extern char* _gniusData;
 extern char _gniusData1[MaxGniusData];
 extern char _gniusData2[MaxGniusData];
-extern char _gniusData3[MaxGniusData];
+extern char* _mobileData;
+extern char _mobileData1[MaxGniusData];
+extern char _mobileData2[MaxGniusData];
 
 static bool _initialised = false;
 static SOCKET sockfd;
@@ -112,14 +114,20 @@ void gniusServer()
         timeout.tv_usec = 0;
 
         char* newGniusData;
+        char* newMobileData;
+
         if (_gniusData == _gniusData1) {
             newGniusData = _gniusData2;
         }
-        else if (_gniusData == _gniusData2) {
-            newGniusData = _gniusData3;
-        }
         else {
             newGniusData = _gniusData1;
+        }
+
+        if (_mobileData == _mobileData1) {
+            newMobileData = _mobileData2;
+        }
+        else {
+            newMobileData = _mobileData1;
         }
 
         // Wait for Simulator to send data (non-blocking, 2 second timeout)
@@ -143,8 +151,15 @@ void gniusServer()
             else {
                 //printf("Received %d bytes of G-NIUS data from %s\n", bytes, inet_ntoa(senderAddr.sin_addr));
                 newGniusData[bytes] = '\0';
-                _gniusData = newGniusData;
-                //printf("Got gnius data: %s\n", _gniusData);
+                if (newGniusData[2] == '7') {
+                    _gniusData = newGniusData;
+                    //printf("Got gnius data: %s\n", _gniusData);
+                }
+                else {
+                    memcpy(newMobileData, newGniusData, bytes + 1);
+                    _mobileData = newMobileData;
+                    //printf("Got mobile data: %s\n", _mobileData);
+                }
                 //fflush(stdout);
                 failures = 0;
             }

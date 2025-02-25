@@ -13,6 +13,7 @@
 extern char* _pilotAwareData;
 extern char* _fr24Data;
 extern char* _gniusData;
+extern char* _mobileData;
 extern Settings _settings;
 extern AircraftDrawData _aircraft;
 extern bool _haveAble;
@@ -619,6 +620,17 @@ bool GetLiveData()
 
     // Add in G-NIUS data
     pos = strchr(_gniusData, '#');
+    while (pos) {
+        pos++;
+        if (addAircraftData(pos, &_aircraftData[_aircraftCount])) {
+            updateArea();
+            _aircraftCount++;
+        }
+        pos = strchr(pos, '#');
+    }
+
+    // Add in Mobile data
+    pos = strchr(_mobileData, '#');
     while (pos) {
         pos++;
         if (addAircraftData(pos, &_aircraftData[_aircraftCount])) {
