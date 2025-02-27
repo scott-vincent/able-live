@@ -36,7 +36,8 @@ static SOCKET sockfd;
 static sockaddr_in senderAddr;
 static int addrSize = sizeof(senderAddr);
 static int bytes;
-static int failures = 0;
+time_t lastGniusData = 0;
+time_t lastMobileData = 0;
 
 static void serverInit()
 {
@@ -92,6 +93,22 @@ static void serverCleanUp()
     printf("G-NIUS Server exiting\n");
     _gniusQuit = true;
     _quit = true;
+}
+
+void checkStale()
+{
+    time_t now;
+    time(&now);
+
+    if (_gniusData[0] != '\0' && now - lastGniusData > 3) {
+        *_gniusData = '\0';
+        lastGniusData = 0;
+    }
+
+    if (_mobileData[0] != '\0' && now - lastMobileData > 3) {
+        *_mobileData = '\0';
+        lastMobileData = 0;
+    }
 }
 
 void gniusServer()
@@ -150,18 +167,27 @@ void gniusServer()
             }
             else {
                 //printf("Received %d bytes of G-NIUS data from %s\n", bytes, inet_ntoa(senderAddr.sin_addr));
+                time_t now;
+                time(&now);
+
                 newGniusData[bytes] = '\0';
                 if (newGniusData[2] == '7') {
                     _gniusData = newGniusData;
-                    //printf("Got gnius data: %s\n", _gniusData);
+                    if (lastGniusData <= 1) {
+                        printf("Got Gnius data: %s\n", _gniusData);
+                    }
+                    lastGniusData = now;
                 }
                 else {
                     memcpy(newMobileData, newGniusData, bytes + 1);
                     _mobileData = newMobileData;
-                    //printf("Got mobile data: %s\n", _mobileData);
+                    if (lastMobileData <= 1) {
+                        printf("Got Mobile data: %s\n", _mobileData);
+                    }
+                    lastMobileData = now;
                 }
                 //fflush(stdout);
-                failures = 0;
+                checkStale();
             }
         }
         else {
@@ -169,15 +195,15 @@ void gniusServer()
         }
 
         if (bytes == SOCKET_ERROR) {
-            failures++;
-            if (failures > 1) {
-                *_gniusData = '\0';
-                failures = 99;
+            if (lastGniusData == 0) {
+                printf("Wait for Gnius data\n");
+                lastGniusData = 1;
             }
-            else {
-                printf("Wait for gnius data (%d)\n", failures);
-                fflush(stdout);
+            if (lastMobileData == 0) {
+                printf("Wait for Mobile data\n");
+                lastMobileData = 1;
             }
+            checkStale();
         }
     }
 

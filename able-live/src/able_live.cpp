@@ -53,7 +53,7 @@ int main(int argc, char **argv)
     _gniusData = _gniusData1;
 
     *_mobileData1 = '\0';
-    _mobileData = _gniusData1;
+    _mobileData = _mobileData1;
 
     // Start the PilotAware thread
     std::thread pilotAwareThread(pilotAwareFetch);
