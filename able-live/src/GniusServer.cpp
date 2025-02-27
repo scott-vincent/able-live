@@ -204,6 +204,7 @@ void gniusServer()
                 lastMobileData = 1;
             }
             checkStale();
+            milliSleep(500);
         }
     }
 
