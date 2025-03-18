@@ -55,6 +55,7 @@ static void fetchInit()
         return;
     }
 
+    curl_easy_setopt(_curl, CURLOPT_SSL_VERIFYPEER, false);
     curl_easy_setopt(_curl, CURLOPT_WRITEFUNCTION, &curlWrite);
 
     // Get URL
