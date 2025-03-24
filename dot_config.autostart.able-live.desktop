@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Able-Live
+Exec=/home/pi/able-live/run.sh >/home/pi/able-live.log

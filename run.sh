@@ -1,3 +1,27 @@
-cd able-live
-# DISPLAY=:0 xrandr --output HDMI-1 --rotate normal
-./able-live >/home/pi/able-live.log
+if [ "$1" != "" ]
+then
+  echo sleep $1
+  sleep $1
+fi
+cd /home/pi/able-live
+while [ 1 ]
+do
+  if [ ! -f /usr/local/bin/able-suppress.dat ]
+  then
+    /home/pi/get-pilotaware-url.sh
+    cd /home/pi/able-live/able-live
+    ./able-live
+  fi
+
+  if [ -f /usr/local/bin/able-suppress.dat ]
+  then
+    echo Paused
+    while [ -f /usr/local/bin/able-suppress.dat ]
+    do
+      sleep 1
+    done
+  else
+    echo Restarting in 5 seconds
+    sleep 5
+  fi
+done
