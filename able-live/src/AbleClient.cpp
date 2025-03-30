@@ -354,6 +354,14 @@ bool addAircraftData(char* pos, PosData* posData)
         strcpy(posData->callsign, "G-MOAI");
         posData->bmp = _aircraft.Gnius;
     }
+    else if (num == 21) {
+        strcpy(posData->callsign, "G-HANG");
+        posData->bmp = _aircraft.Gnius;
+    }
+    else if (num == 22) {
+        strcpy(posData->callsign, "G-HANI");
+        posData->bmp = _aircraft.Gnius;
+    }
     else {
         sprintf(posData->callsign, "ABLE%02d", num);
         posData->bmp = _aircraft.Able;
