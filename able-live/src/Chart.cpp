@@ -1122,7 +1122,7 @@ long getMillis()
 
 long milliDiff(int millis1, int millis2)
 {
-    if (millis1 < millis2) {
+    if (millis1 <= millis2) {
         if (millis1 == 0) {
             return 86400000;
         }
