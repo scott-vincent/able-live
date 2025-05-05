@@ -29,6 +29,7 @@ const char AircraftTurboprop[] = "resources/images/turboprop.png";
 const char AircraftHeli[] = "resources/images/heli.png";
 const char AircraftAble[] = "resources/images/able.png";
 const char AircraftGnius[] = "resources/images/gnius.png";
+const char AircraftMilitaryGnius[] = "resources/images/military_gnius.png";
 const char AircraftAirliner[] = "resources/images/airliner.png";
 const char AircraftHeavy[] = "resources/images/heavy.png";
 const char AircraftGlider[] = "resources/images/glider.png";
@@ -201,6 +202,7 @@ void initVars()
     _aircraft.Heli = NULL;
     _aircraft.Able = NULL;
     _aircraft.Gnius = NULL;
+    _aircraft.Military_Gnius = NULL;
     _aircraft.Airliner = NULL;
     _aircraft.Heavy = NULL;
     _aircraft.Glider = NULL;
@@ -260,11 +262,13 @@ void initVars()
     ableColour[12] = al_map_rgb(0x52, 0x7d, 0xff);
     ableColour[13] = al_map_rgb(0xa8, 0x52, 0xff);
     ableColour[14] = al_map_rgb(0x52, 0xff, 0xff);
-    ableColour[15] = al_map_rgb(0xff, 0x52, 0x93);
-    ableColour[16] = al_map_rgb(0x52, 0xff, 0xff);
-    ableColour[17] = al_map_rgb(0xff, 0x52, 0x93);
-    ableColour[18] = al_map_rgb(0x52, 0x7d, 0xff);
-    ableColour[19] = al_map_rgb(0xa8, 0x52, 0xff);
+    ableColour[15] = al_map_rgb(0x52, 0x7d, 0xff);
+    ableColour[16] = al_map_rgb(0xff, 0x52, 0x93);
+    ableColour[17] = al_map_rgb(0x52, 0xff, 0xff);
+    ableColour[18] = al_map_rgb(0xff, 0x52, 0x93);
+    ableColour[19] = al_map_rgb(0x52, 0x7d, 0xff);
+    ableColour[20] = al_map_rgb(0xff, 0x52, 0x93);
+    ableColour[21] = al_map_rgb(0x52, 0x7d, 0xff);
 }
 
 void cleanupTags()
@@ -499,6 +503,7 @@ void cleanup()
     cleanupBitmap(_aircraft.Heli);
     cleanupBitmap(_aircraft.Able);
     cleanupBitmap(_aircraft.Gnius);
+    cleanupBitmap(_aircraft.Military_Gnius);
     cleanupBitmap(_aircraft.Airliner);
     cleanupBitmap(_aircraft.Heavy);
     cleanupBitmap(_aircraft.Glider);
@@ -602,6 +607,11 @@ bool initAircraft()
 
     if (!(_aircraft.Gnius = al_load_bitmap(AircraftGnius))) {
         printf("Missing file: %s\n", AircraftGnius);
+        return false;
+    }
+
+    if (!(_aircraft.Military_Gnius = al_load_bitmap(AircraftMilitaryGnius))) {
+        printf("Missing file: %s\n", AircraftMilitaryGnius);
         return false;
     }
 
@@ -933,6 +943,9 @@ void drawAircraft(int idx)
 
 void drawTrail(Trail *trail, int num)
 {
+    int prevX = 0;
+    int prevY = 0;
+
     double x1, y1, x2, y2;
     locationToDisplay(&trail->loc[0], &x1, &y1);
 
@@ -941,8 +954,19 @@ void drawTrail(Trail *trail, int num)
 
         al_draw_line(round(x1), round(y1), round(x2), round(y2), ableColour[num], 2);
 
+        prevX = x1;
+        prevY = y1;
         x1 = x2;
         y1 = y2;
+    }
+
+    if (num > 15 && trail->count > 1) {
+        // If sim trail has jumped then sim was restarted so delete old trail
+        int xDiff = x1 - prevX;
+        int yDiff = y1 - prevY;
+        if (abs(xDiff) > 150 || abs(yDiff) > 150) {
+            trail->count = 0;
+        }
     }
 }
 

@@ -295,7 +295,7 @@ bool addMe()
 bool addAircraftData(char* pos, PosData* posData)
 {
     int num = atoi(pos);
-    if (num < 1 || num > 20) {
+    if (num < 1 || num > 22) {
         printf("addAircraftData: Bad data (num out of range): %s\n", pos);
         return false;
     }
@@ -355,11 +355,16 @@ bool addAircraftData(char* pos, PosData* posData)
         posData->bmp = _aircraft.Gnius;
     }
     else if (num == 21) {
-        strcpy(posData->callsign, "G-HANG");
-        posData->bmp = _aircraft.Gnius;
+        strcpy(posData->callsign, "G-EFIS");
+        if (strncmp(posData->typeCode, "F18", 3) == 0) {
+            posData->bmp = _aircraft.Military_Gnius;
+        }
+        else {
+            posData->bmp = _aircraft.Gnius;
+        }
     }
     else if (num == 22) {
-        strcpy(posData->callsign, "G-HANI");
+        strcpy(posData->callsign, "G-EFAI");
         posData->bmp = _aircraft.Gnius;
     }
     else {
@@ -400,8 +405,10 @@ void updateArea()
     bool isGniai = strncmp(_aircraftData[_aircraftCount].callsign, "G-NIAI", 6) == 0;
     bool isMobl = strncmp(_aircraftData[_aircraftCount].callsign, "G-MOBL", 6) == 0;
     bool isMoai = strncmp(_aircraftData[_aircraftCount].callsign, "G-MOAI", 6) == 0;
+    bool isEfis = strncmp(_aircraftData[_aircraftCount].callsign, "G-EFIS", 6) == 0;
+    bool isEfai = strncmp(_aircraftData[_aircraftCount].callsign, "G-EFAI", 6) == 0;
 
-    if (strncmp(_aircraftData[_aircraftCount].callsign, "ABLE", 4) == 0 || isGnius || isGniai || isMobl || isMoai) {
+    if (strncmp(_aircraftData[_aircraftCount].callsign, "ABLE", 4) == 0 || isGnius || isGniai || isMobl || isMoai || isEfis || isEfai) {
         _aircraftData[_aircraftCount].isAble = true;
         _haveAble = true;
 
@@ -418,6 +425,12 @@ void updateArea()
         else if (isMoai) {
             num = 20;
         }
+        else if (isEfis) {
+            num = 21;
+        }
+        else if (isEfai) {
+            num = 22;
+        }
         else {
             num = atoi(&_aircraftData[_aircraftCount].callsign[4]);
         }
@@ -431,10 +444,13 @@ void updateArea()
 
         int i = _ableTrail[num].count;
         if (i < 6000) {
-            _ableTrail[num].loc[i].lat = _aircraftData[_aircraftCount].loc.lat;
-            _ableTrail[num].loc[i].lon = _aircraftData[_aircraftCount].loc.lon;
             time(&_ableTrail[num].lastUpdate);
-            _ableTrail[num].count++;
+
+            if (i == 0 || _ableTrail[num].loc[i-1].lat != _aircraftData[_aircraftCount].loc.lat || _ableTrail[num].loc[i-1].lon != _aircraftData[_aircraftCount].loc.lon) {
+                _ableTrail[num].loc[i].lat = _aircraftData[_aircraftCount].loc.lat;
+                _ableTrail[num].loc[i].lon = _aircraftData[_aircraftCount].loc.lon;
+                _ableTrail[num].count++;
+            }
         }
     }
     else {

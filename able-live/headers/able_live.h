@@ -18,7 +18,7 @@ const int MaxPilotAwareData = 262144;
 const int MaxFr24Data = 512;
 const int MaxGniusData = 512;
 const int MaxAircraft = 256;
-const int MaxAble = 20;
+const int MaxAble = 22;
 const char ImagesDir[] = "resources/images";
 const char FontsDir[] = "resources/fonts";
 const char SmallChart[] = "resources/maps/Small.png";
@@ -80,6 +80,7 @@ struct AircraftDrawData {
     ALLEGRO_BITMAP* Heli;
     ALLEGRO_BITMAP* Able;
     ALLEGRO_BITMAP* Gnius;
+    ALLEGRO_BITMAP* Military_Gnius;
     ALLEGRO_BITMAP* Airliner;
     ALLEGRO_BITMAP* Heavy;
     ALLEGRO_BITMAP* Glider;
