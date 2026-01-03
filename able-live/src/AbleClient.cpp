@@ -91,6 +91,10 @@ double jsonNum(char* str)
 
 void fixCallsign(char* callsign)
 {
+    if (strcmp(callsign, "ABLE1E") == 0) {
+        strcpy(callsign, "ABLE10");
+    }
+
     if (strlen(callsign) < 4 || callsign[0] != 'G') {
         return;
     }
