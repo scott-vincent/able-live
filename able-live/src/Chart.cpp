@@ -735,7 +735,7 @@ void initView()
     expandBorder(1, &minMedium, &maxMedium);
     double mediumZoom = zoom(&_chartSourceData[1], &minMedium, &maxMedium);
 
-    if (minSmall.lat >= MinLatSmall && minSmall.lon >= MinLonSmall && maxSmall.lat <= MaxLatSmall && maxSmall.lon <= MaxLonSmall && smallZoom < 0.65) {
+    if (_aircraftCount > 0 && minSmall.lat >= MinLatSmall && minSmall.lon >= MinLonSmall && maxSmall.lat <= MaxLatSmall && maxSmall.lon <= MaxLonSmall && smallZoom < 0.65) {
         switchChart(0);
         //printf("border left: %f, right: %f, top: %f, bottom: %f\n", minSmall.lon - _minLoc.lon, maxSmall.lon - _maxLoc.lon, maxSmall.lat - _maxLoc.lat, minSmall.lat - _minLoc.lat);
         memcpy(&_minLoc, &minSmall, sizeof(Locn));
@@ -776,10 +776,10 @@ void initView()
     targetLoc.lon = _minLoc.lon;
     locationToChartPos(&targetLoc, &zoomTarget);
 
-    if (zoomTarget.x < zoomCurrent.x || zoomTarget.y < zoomCurrent.y) {
+    if (_aircraftCount > 0 && (zoomTarget.x < zoomCurrent.x || zoomTarget.y < zoomCurrent.y)) {
         zoomDirn = 1;
     }
-    else if (zoomTarget.x > zoomCurrent.x && zoomTarget.y > zoomCurrent.y) {
+    else if (_aircraftCount > 0 && (zoomTarget.x > zoomCurrent.x && zoomTarget.y > zoomCurrent.y)) {
         zoomDirn = -1;
     }
     else {
@@ -1246,7 +1246,7 @@ void showChart()
         }
 
         long now = getMillis();
-        if (milliDiff(lastFetch, now) > 1200 && !paused) {
+        if (milliDiff(lastFetch, now) > 1800 && !paused) {
             lastFetch = now;
             if (GetLiveData()) {
                 lastSuccess = now;
