@@ -1251,7 +1251,7 @@ void showChart()
         }
 
         long now = getMillis();
-        if (milliDiff(lastFetch, now) > 1200 && !paused) {
+        if (milliDiff(lastFetch, now) > 1800 && !paused) {
             lastFetch = now;
             if (GetLiveData()) {
                 lastSuccess = now;
