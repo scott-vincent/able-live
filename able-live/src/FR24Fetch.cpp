@@ -118,7 +118,7 @@ void fr24Fetch()
     while (!_quit)
     {
         if (doRequest()) {
-            //printf("Got fr24 data (%lld bytes)\n", strlen(_fr24Data));
+            //printf("Got fr24 data (%lld bytes) from %s\n", strlen(_fr24Data), _ableDisplayUrl);
             failures = 0;
         }
         else {

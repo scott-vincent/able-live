@@ -735,20 +735,23 @@ void initView()
     expandBorder(1, &minMedium, &maxMedium);
     double mediumZoom = zoom(&_chartSourceData[1], &minMedium, &maxMedium);
 
-    if (minSmall.lat >= MinLatSmall && minSmall.lon >= MinLonSmall && maxSmall.lat <= MaxLatSmall && maxSmall.lon <= MaxLonSmall && smallZoom < 0.65) {
+    if (_aircraftCount > 0 && minSmall.lat >= MinLatSmall && minSmall.lon >= MinLonSmall && maxSmall.lat <= MaxLatSmall && maxSmall.lon <= MaxLonSmall && smallZoom < 0.65) {
         switchChart(0);
+        printf("Small zoom\n");
         //printf("border left: %f, right: %f, top: %f, bottom: %f\n", minSmall.lon - _minLoc.lon, maxSmall.lon - _maxLoc.lon, maxSmall.lat - _maxLoc.lat, minSmall.lat - _minLoc.lat);
         memcpy(&_minLoc, &minSmall, sizeof(Locn));
         memcpy(&_maxLoc, &maxSmall, sizeof(Locn));
     }
     else if (minMedium.lat >= MinLatMedium && minMedium.lon >= MinLonMedium && maxMedium.lat <= MaxLatMedium && maxMedium.lon <= MaxLonMedium && mediumZoom < 0.81) {
         switchChart(1);
+        printf("Medium zoom\n");
         //printf("border left: %f, right: %f, top: %f, bottom: %f\n", minMedium.lon - _minLoc.lon, maxMedium.lon - _maxLoc.lon, maxMedium.lat - _maxLoc.lat, minMedium.lat - _minLoc.lat);
         memcpy(&_minLoc, &minMedium, sizeof(Locn));
         memcpy(&_maxLoc, &maxMedium, sizeof(Locn));
     }
     else {
         switchChart(2);
+        printf("Large zoom\n");
         Locn minLarge, maxLarge;
         expandBorder(2, &minLarge, &maxLarge);
         //printf("border left: %f, right: %f, top: %f, bottom: %f\n", minLarge.lon - _minLoc.lon, maxLarge.lon - _maxLoc.lon, maxLarge.lat - _maxLoc.lat, minLarge.lat - _minLoc.lat);
@@ -776,10 +779,10 @@ void initView()
     targetLoc.lon = _minLoc.lon;
     locationToChartPos(&targetLoc, &zoomTarget);
 
-    if (zoomTarget.x < zoomCurrent.x || zoomTarget.y < zoomCurrent.y) {
+    if (_aircraftCount > 0 && (zoomTarget.x < zoomCurrent.x || zoomTarget.y < zoomCurrent.y)) {
         zoomDirn = 1;
     }
-    else if (zoomTarget.x > zoomCurrent.x && zoomTarget.y > zoomCurrent.y) {
+    else if (_aircraftCount > 0 && (zoomTarget.x > zoomCurrent.x && zoomTarget.y > zoomCurrent.y)) {
         zoomDirn = -1;
     }
     else {
@@ -804,17 +807,17 @@ void zoomView()
         if (zoomTarget.x > zoomCurrent.x && zoomTarget.y > zoomCurrent.y) {
             zoomDirn = 0;
             _chart.scale += 1;
-            //printf("Zoom finished - scale: %f\n", _chart.scale);
+            printf("Zoom finished - scale: %f\n", _chart.scale);
         }
         else {
             newScale = _chart.scale - 1;
             if (newScale < MinScale) {
-                //printf("Zoom min - scale: %f\n", _chart.scale);
+                printf("Zoom min - scale: %f\n", _chart.scale);
                 zoomDirn = 0;
             }
             else {
                 _chart.scale = newScale;
-                //printf("Zoom in - scale: %f\n", _chart.scale);
+                printf("Zoom in - scale: %f\n", _chart.scale);
             }
         }
     }
@@ -822,17 +825,17 @@ void zoomView()
         if (zoomTarget.x < zoomCurrent.x || zoomTarget.y < zoomCurrent.y) {
             zoomDirn = 0;
             _chart.scale -= 1;
-            //printf("Zoom finished - scale: %f\n", _chart.scale);
+            printf("Zoom finished - scale: %f\n", _chart.scale);
         }
         else {
             newScale = _chart.scale + 1;
             if (newScale > MaxScale) {
-                //printf("Zoom max - scale: %f\n", _chart.scale);
+                printf("Zoom max - scale: %f\n", _chart.scale);
                 zoomDirn = 0;
             }
             else {
                 _chart.scale = newScale;
-                //printf("Zoom out - scale: %f\n", _chart.scale);
+                printf("Zoom out - scale: %f\n", _chart.scale);
             }
         }
     }
@@ -916,6 +919,7 @@ void createTag(PosData* posData)
 void drawAircraft(int idx)
 {
     if (_settings.excludeHighAlt && !_aircraftData[idx].isAble && _aircraftData[idx].altitude > 6000) {
+        printf("Skip aircraft\n");
         return;
     }
 
@@ -1000,6 +1004,7 @@ void render()
     _ableTrail[17].count = 0;
 #endif
 
+    printf("Aircraft count: %d\n", _aircraftCount);
     for (int i = 0; i < _aircraftCount; i++) {
         drawAircraft(i);
     }
