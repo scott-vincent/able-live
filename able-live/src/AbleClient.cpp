@@ -134,7 +134,7 @@ void fixCallsign(char* callsign)
     else if (strcmp(suffix, "OFTR") == 0) {
         strcpy(callsign, "ABLE10");
     }
-    else if (strcmp(suffix, "BNNY") == 0) {
+    else if (strcmp(suffix, "XXXX") == 0) {
         strcpy(callsign, "ABLE11");
     }
     else if (strcmp(suffix, "BRUD") == 0) {

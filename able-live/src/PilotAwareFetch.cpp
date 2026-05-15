@@ -100,6 +100,7 @@ static bool doRequest()
     CURLcode res = curl_easy_perform(_curl);
     if (res != CURLE_OK) {
         fprintf(stderr, "Fetch PilotAware data failed: %s\n", curl_easy_strerror(res));
+        fflush(stderr);
         return false;
     }
 
@@ -119,20 +120,24 @@ void pilotAwareFetch()
     {
         if (doRequest()) {
             //printf("Got pilotAware data (%lld bytes)\n", strlen(_pilotAwareData));
+            //fflush(stdout);
+            if (failures == 99) { 
+                printf("PilotAware data resumed\n");
+                fflush(stdout);
+            }
             failures = 0;
         }
         else {
             failures++;
-            if (failures > 3) {
+            if (failures > 30 && failures < 99) {
+                printf("Lost PilotAware data for more than 30 seconds\n");
+                fflush(stdout);
                 *_pilotAwareData = '\0';
                 failures = 99;
             }
-            else {
-                printf("Wait for pilotAware data (%d)\n", failures);
-            }
         }
 
-        milliSleep(1000);
+        milliSleep(1500);
     }
 
     fetchCleanUp();
