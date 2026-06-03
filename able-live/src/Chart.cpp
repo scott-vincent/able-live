@@ -1183,7 +1183,6 @@ void showChart()
 
     al_start_timer(_timer);
 
-    long now;
     long lastFetch = 0;
     long lastSuccess = getMillis();
 
