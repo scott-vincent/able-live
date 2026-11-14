@@ -9,8 +9,10 @@
 // Constants
 #ifdef _WINDOWS
 const char WriteDataFile[] = "pilotaware_data";
+const char WriteRadioFile[] = "radiotelephony_data";
 #else
-const char WriteDataFile[] = "/mem/pilotaware_data";    // Send PilotAware data to AbleDisplay
+const char WriteDataFile[] = "/mem/pilotaware_data";        // Send PilotAware data to AbleDisplay
+const char WriteRadioFile[] = "/mem/radiotelephony_data";   // Send Radiotelephony data to RT program
 #endif
 const char PilotAware_Url[] = "../../pilotaware.uri";       // Fetch PilotAware data from ognpaw
 const char AbleDisplay_Url[] = "../../able-display.uri";    // Fetch FR24 data from AbleDisplay

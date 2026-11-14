@@ -27,6 +27,7 @@ char _fr24Data2[MaxFr24Data];
 char* _gniusData;
 char _gniusData1[MaxGniusData];
 char _gniusData2[MaxGniusData];
+char _prevGniusData[MaxGniusData];
 char* _mobileData;
 char _mobileData1[MaxGniusData];
 char _mobileData2[MaxGniusData];
@@ -51,6 +52,7 @@ int main(int argc, char **argv)
 
     *_gniusData1 = '\0';
     _gniusData = _gniusData1;
+    *_prevGniusData = '\0';
 
     *_mobileData1 = '\0';
     _mobileData = _mobileData1;

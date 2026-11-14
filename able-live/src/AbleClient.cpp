@@ -13,6 +13,7 @@
 extern char* _pilotAwareData;
 extern char* _fr24Data;
 extern char* _gniusData;
+extern char _prevGniusData[MaxGniusData];
 extern char* _mobileData;
 extern Settings _settings;
 extern AircraftDrawData _aircraft;
@@ -29,6 +30,7 @@ Locn minAbleLoc;
 Locn maxAbleLoc;
 bool haveAbleNum[MaxAble];
 int ableAlt[MaxAble];
+time_t lastRadiotelephony = 0;
 
 PosData me;
 Locn meLoc[256];
@@ -528,6 +530,50 @@ void writeAbleData()
     }
 }
 
+void writeRadiotelephonyData()
+{
+    // fromData is mobileData when testing at home or gniusData when running at Aerobility
+    //char* fromData = _gniusData;
+    char* fromData = _mobileData;
+
+    // Don't write it too often
+    time_t now;
+    time(&now);
+
+    if (now - lastRadiotelephony < 1) {
+        return;
+    }
+
+    // Ignore the first 7 fields (just want the RT data)
+    int commaCount = 0;
+    while (commaCount < 7) {
+        fromData = strchr(fromData, ',');
+        if (!fromData) {
+            return;
+        }
+        fromData++;
+        commaCount++;
+    }
+
+    // Don't write if not changed
+    if (strcmp(_prevGniusData, fromData) == 0) {
+        return;
+    }
+
+    strcpy(_prevGniusData, fromData);
+    lastRadiotelephony = now;
+
+    FILE* outf = fopen(WriteRadioFile, "w");
+    if (!outf) {
+        printf("Failed to write file: %s\n", WriteRadioFile);
+        return;
+    }
+    fprintf(outf, "%s\n", fromData);
+    fclose(outf);
+
+    //printf("Wrote radiotelephony data\n");
+}
+
 bool GetLiveData()
 {
     char* pos = strstr(_pilotAwareData, "\"acList\":");
@@ -673,6 +719,7 @@ bool GetLiveData()
     }
 
     writeAbleData();
+    writeRadiotelephonyData();
 
     // ABLE aircraft stale after 30 seconds
     for (int i = 0; i < 14; i++) {
