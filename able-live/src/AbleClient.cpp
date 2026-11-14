@@ -533,8 +533,8 @@ void writeAbleData()
 void writeRadiotelephonyData()
 {
     // fromData is mobileData when testing at home or gniusData when running at Aerobility
-    //char* fromData = _gniusData;
-    char* fromData = _mobileData;
+    char* fromData = _gniusData;
+    //char* fromData = _mobileData;
 
     // Don't write it too often
     time_t now;
