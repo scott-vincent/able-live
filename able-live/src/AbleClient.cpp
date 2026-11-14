@@ -418,7 +418,7 @@ void updateArea()
         // Skip displaying ABLE12 as it operates out of Lydd
         strcpy(_aircraftData[_aircraftCount].callsign, "12ABLE");
     }
-
+    
     if (strncmp(_aircraftData[_aircraftCount].callsign, "ABLE", 4) == 0 || isGnius || isGniai || isMobl || isMoai || isEfis || isEfai) {
         _aircraftData[_aircraftCount].isAble = true;
         _haveAble = true;
