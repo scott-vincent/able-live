@@ -95,10 +95,6 @@ void fixCallsign(char* callsign)
         strcpy(callsign, "ABLE10");
     }
     
-    if (strcmp(callsign, "ABLE12") == 0) {
-        strcpy(callsign, "12ABLE");
-    }
-
     if (strlen(callsign) < 4 || callsign[0] != 'G') {
         return;
     }
@@ -142,7 +138,7 @@ void fixCallsign(char* callsign)
         strcpy(callsign, "ABLE11");
     }
     else if (strcmp(suffix, "BRUD") == 0) {
-        strcpy(callsign, "12ABLE");
+        strcpy(callsign, "ABLE12");
     }
     else if (strcmp(suffix, "CDMA") == 0) {
         strcpy(callsign, "ABLE14");
@@ -415,6 +411,11 @@ void updateArea()
     bool isMoai = strncmp(_aircraftData[_aircraftCount].callsign, "G-MOAI", 6) == 0;
     bool isEfis = strncmp(_aircraftData[_aircraftCount].callsign, "G-EFIS", 6) == 0;
     bool isEfai = strncmp(_aircraftData[_aircraftCount].callsign, "G-EFAI", 6) == 0;
+
+    if (strcmp(_aircraftData[_aircraftCount].callsign, "ABLE12") == 0) {
+        // Skip displaying ABLE12 as it operates out of Lydd
+        strcpy(_aircraftData[_aircraftCount].callsign, "12ABLE");
+    }
 
     if (strncmp(_aircraftData[_aircraftCount].callsign, "ABLE", 4) == 0 || isGnius || isGniai || isMobl || isMoai || isEfis || isEfai) {
         _aircraftData[_aircraftCount].isAble = true;
