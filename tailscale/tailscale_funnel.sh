@@ -3,6 +3,12 @@ usage="Usage: $0 [enable|disable]"
 local="/mem/pilotaware_data"
 path="/pilotaware_data"
 
+rtLocal="/mem/radiotelephony_data"
+rtPath="/radiotelephony_data"
+
+ipLocal="/mem/teamspeak_ip"
+ipPath="/teamspeak_ip"
+
 # Create RAM drive
 if [ ! -d /mem ]
 then
