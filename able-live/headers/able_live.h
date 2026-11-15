@@ -10,9 +10,11 @@
 #ifdef _WINDOWS
 const char WriteDataFile[] = "pilotaware_data";
 const char WriteRadioFile[] = "radiotelephony_data";
+const char WriteTeamspeakFile[] = "teamspeak_ip";
 #else
 const char WriteDataFile[] = "/mem/pilotaware_data";        // Send PilotAware data to AbleDisplay
 const char WriteRadioFile[] = "/mem/radiotelephony_data";   // Send Radiotelephony data to RT program
+const char WriteTeamspeakFile[] = "/mem/teamspeak_ip";      // Send Teamspeak IP to G-NIUS Simulator
 #endif
 const char PilotAware_Url[] = "../../pilotaware.uri";       // Fetch PilotAware data from ognpaw
 const char AbleDisplay_Url[] = "../../able-display.uri";    // Fetch FR24 data from AbleDisplay

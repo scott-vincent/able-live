@@ -8,7 +8,7 @@
 #include <thread>
 #include "ChartFile.h"
 
-const char* versionString = "v1.1.0";
+const char* versionString = "v1.3.1";
 bool _quit = false;
 bool _pilotAwareQuit = false;
 bool _fr24Quit = false;
@@ -39,7 +39,7 @@ void showChart();
 
 int main(int argc, char **argv)
 {
-    printf("Able Live %s Copyright (c) 2025 Scott Vincent\n", versionString);
+    printf("Able Live %s Copyright (c) 2026 Scott Vincent\n", versionString);
     fflush(stdout);
 
     strcpy(_moduleFilename, argv[0]);
