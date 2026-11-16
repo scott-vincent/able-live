@@ -533,9 +533,32 @@ void writeAbleData()
 
 void writeRadiotelephonyData()
 {
-    // fromData is mobileData when testing at home or gniusData when running at Aerobility
+    // fromData is mobileData when testing at home or gniusData when running at Aerobility.
+    // Take first line only and see if it is at least 48 chars long.
     char* fromData = _gniusData;
-    //char* fromData = _mobileData;
+    char* pos = NULL;
+
+    if (fromData && *fromData == '#') {
+        pos = strchr(fromData + 1, '#');
+        if (!pos) {
+            pos = fromData + strlen(fromData);
+        }
+    }
+
+    if (!pos || pos - fromData < 48) {
+        fromData = _mobileData;
+        pos = NULL;
+        if (fromData && *fromData == '#') {
+            pos = strchr(fromData + 1, '#');
+            if (!pos) {
+                pos = fromData + strlen(fromData);
+            }
+        }
+    }
+
+    if (!pos || pos - fromData < 48) {
+        return;
+    }
 
     // Don't write it too often
     time_t now;
@@ -545,9 +568,9 @@ void writeRadiotelephonyData()
         return;
     }
 
-    // Ignore the first 7 fields (just want the RT data)
+    // Ignore the first 2 fields
     int commaCount = 0;
-    while (commaCount < 7) {
+    while (commaCount < 2) {
         fromData = strchr(fromData, ',');
         if (!fromData) {
             return;
