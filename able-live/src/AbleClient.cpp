@@ -531,73 +531,6 @@ void writeAbleData()
     }
 }
 
-void writeRadiotelephonyData()
-{
-    // fromData is mobileData when testing at home or gniusData when running at Aerobility.
-    // Take first line only and see if it is at least 48 chars long.
-    char* fromData = _gniusData;
-    char* pos = NULL;
-
-    if (fromData && *fromData == '#') {
-        pos = strchr(fromData + 1, '#');
-        if (!pos) {
-            pos = fromData + strlen(fromData);
-        }
-    }
-
-    if (!pos || pos - fromData < 48) {
-        fromData = _mobileData;
-        pos = NULL;
-        if (fromData && *fromData == '#') {
-            pos = strchr(fromData + 1, '#');
-            if (!pos) {
-                pos = fromData + strlen(fromData);
-            }
-        }
-    }
-
-    if (!pos || pos - fromData < 48) {
-        return;
-    }
-
-    // Don't write it too often
-    time_t now;
-    time(&now);
-
-    if (now - lastRadiotelephony < 1) {
-        return;
-    }
-
-    // Ignore the first 2 fields
-    int commaCount = 0;
-    while (commaCount < 2) {
-        fromData = strchr(fromData, ',');
-        if (!fromData) {
-            return;
-        }
-        fromData++;
-        commaCount++;
-    }
-
-    // Don't write if not changed
-    if (strcmp(_prevGniusData, fromData) == 0) {
-        return;
-    }
-
-    strcpy(_prevGniusData, fromData);
-    lastRadiotelephony = now;
-
-    FILE* outf = fopen(WriteRadioFile, "w");
-    if (!outf) {
-        printf("Failed to write file: %s\n", WriteRadioFile);
-        return;
-    }
-    fprintf(outf, "%s\n", fromData);
-    fclose(outf);
-
-    //printf("Wrote radiotelephony data\n");
-}
-
 bool GetLiveData()
 {
     char* pos = strstr(_pilotAwareData, "\"acList\":");
@@ -743,7 +676,6 @@ bool GetLiveData()
     }
 
     writeAbleData();
-    writeRadiotelephonyData();
 
     // ABLE aircraft stale after 30 seconds
     for (int i = 0; i < 14; i++) {

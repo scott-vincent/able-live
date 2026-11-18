@@ -111,21 +111,6 @@ void checkStale()
     }
 }
 
-void writeTeamspeak(char *str)
-{
-    char ipAddr[32];
-    strcpy(ipAddr, &str[3]);
-    printf("Got Teamspeak IP address: %s\n", ipAddr);
-
-    FILE* outf = fopen(WriteTeamspeakFile, "w");
-    if (!outf) {
-        printf("Failed to write file: %s\n", WriteTeamspeakFile);
-        return;
-    }
-    fprintf(outf, "%s\n", ipAddr);
-    fclose(outf);
-}
-
 void gniusServer()
 {
     serverInit();
@@ -186,10 +171,7 @@ void gniusServer()
                 time(&now);
 
                 newGniusData[bytes] = '\0';
-                if (bytes > 4 && strncmp(newGniusData, "IP:", 3) == 0) {
-                    writeTeamspeak(newGniusData);
-                }
-                else if (newGniusData[2] == '7') {
+                if (bytes > 2 && newGniusData[2] == '7') {
                     _gniusData = newGniusData;
                     if (lastGniusData <= 1) {
                         printf("Got Gnius data: %s\n", _gniusData);
