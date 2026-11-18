@@ -1,0 +1,25 @@
+able_display runs on RasPi2 inside the ABLE black box with four 7-segment displays.
+able_fr24 also runs on the Black Box and fetches data from FlightRadar24.
+able_live runs on RasPi3b an fetches data from PilotAware.
+
+able_display calls get_able_data.py to read data from two sources:
+  It reads the data from /mem/fr24_data
+  It uses Tailscale to read the data from file able-live:/mem/pilotaware_data
+
+It relies on able_fr24 which runs on this host under service able_fr24. This writes the data file.
+Note that able-live writes file /mem/pilotaware_data and makes it available via Tailscale.
+
+Note that able_fr24 also writes file /mem/fr24_live_data and makes it available via Tailscale so it
+can be read by able-live.
+
+Host            Filename                    Data Format     Written By      Read By
+----            --------                    -----------     ----------      -------
+able-display    /mem/fr24_data              --,02,--,--     able_fr24.py    able_display,autopilot
+able-display    /mem/fr24_live_data         #1,51.234,      able_fr24.py    able_live
+able-live       /mem/pilotaware_data        --,02,--,--     able_live       able_display,autopilot
+
+To Create RAM Disk:
+
+sudo mkdir /mem
+vi /etc/fstab
+  tmpfs /mem tmpfs nodev,nosuid,siz=1M 0 0
