@@ -1,0 +1,20 @@
+if [ "$1" = "able-live" ]
+then
+  ip=`hostname -I | cut -f 1 -d " "`
+  file="/mem/able-live.ip"
+elif [ "$1" = "teamspeak" ]
+then
+  if [ "$2" = "" ]
+  then
+    echo "IP address of Teamspeak server must be supplied"
+    exit 1
+  fi
+  ip="$2"
+  file="/mem/teamspeak.ip"
+else
+  echo "Specify able-live or teamspeak [ip]"
+  exit 1
+fi
+
+echo -n $ip >$file
+echo "$ip written to $file"

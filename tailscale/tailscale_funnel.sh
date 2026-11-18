@@ -3,17 +3,17 @@ usage="Usage: $0 [enable|disable]"
 local="/mem/pilotaware_data"
 path="/pilotaware_data"
 
-rtLocal="/mem/radiotelephony_data"
-rtPath="/radiotelephony_data"
+liveLocal="/mem/able-live.ip"
+livePath="/able-live.ip"
 
-ipLocal="/mem/teamspeak_ip"
-ipPath="/teamspeak_ip"
+tsLocal="/mem/teamspeak.ip"
+tsPath="/teamspeak.ip"
 
 # Create RAM drive
 if [ ! -d /mem ]
 then
   sudo mkdir /mem
-  echo tmpfs /mem tmpfs nodev,nosuid,size=32K 0 0 | sudo tee -a /etc/fstab >/dev/null
+  echo tmpfs /mem tmpfs nodev,nosuid,size=1M 0 0 | sudo tee -a /etc/fstab >/dev/null
   sudo mount -a
 fi
 
@@ -25,22 +25,22 @@ then
     fi
     sudo tailscale funnel --set-path $path -bg "$local"
 
-    if [ ! -f $rtLocal ]
+    if [ ! -f $liveLocal ]
     then
-        >$rtLocal
+        >$liveLocal
     fi
-    sudo tailscale funnel --set-path $rtPath -bg "$rtLocal"
+    sudo tailscale funnel --set-path $livePath -bg "$liveLocal"
 
-    if [ ! -f $ipLocal ]
+    if [ ! -f $tsLocal ]
     then
-        >$ipLocal
+        >$tsLocal
     fi
-    sudo tailscale funnel --set-path $ipPath -bg "$ipLocal"
+    sudo tailscale funnel --set-path $tsPath -bg "$tsLocal"
 elif [ "$1" = disable ]
 then
     sudo tailscale funnel --set-path $path -bg "$local" off
-    sudo tailscale funnel --set-path $rtPath -bg "$rtLocal" off
-    sudo tailscale funnel --set-path $ipPath -bg "$ipLocal" off
+    sudo tailscale funnel --set-path $rtPath -bg "$liveLocal" off
+    sudo tailscale funnel --set-path $ipPath -bg "$tsLocal" off
     tailscale serve status
 else
     echo "$usage"
