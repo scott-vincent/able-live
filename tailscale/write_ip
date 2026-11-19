@@ -1,10 +1,16 @@
 if [ "$1" = "able-live" ]
 then
   ip=""
-  while [ "$ip" = "" ]
+  len=0
+  while [ "$ip" = "" -o $len -gt 4 ]
   do
-    ip=`hostname -I | cut -f 1 -d " "`
     sleep 1
+    ip=`hostname -I | cut -d' ' -f 1`
+    len=`echo "$ip" | cut -d'.' -f 1 | wc -c`
+    if [ "$ip" != "" ]
+    then
+      echo "ip = $ip  len = $len"
+    fi
   done
   while [ ! -d /mem ]
   do
@@ -32,5 +38,6 @@ chown pi:pi $file
 chmod 666 $file
 
 file="/mem/teamspeak.ip"
+>$file
 chown pi:pi $file
 chmod 666 $file
