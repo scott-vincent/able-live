@@ -13,7 +13,7 @@ tsPath="/teamspeak.ip"
 if [ ! -d /mem ]
 then
   sudo mkdir /mem
-  echo tmpfs /mem tmpfs nodev,nosuid,size=1M 0 0 | sudo tee -a /etc/fstab >/dev/null
+  echo tmpfs /mem tmpfs size=1M 0 0 | sudo tee -a /etc/fstab >/dev/null
   sudo mount -a
 fi
 
