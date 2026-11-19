@@ -29,7 +29,7 @@ Radiotephony Feature Added
 Hardware PTT switch wired up and connected to G-NIUS secondary PC via USB hub behind radio stack. Had to install
 joy2key.exe as the PTT button wasn't being detected properly in Teamspeak so mapped it to 'p' key.
 
-Headset sockets added inside Sim and connect via USB through firewall and directly into back of secondary PC (failed
+Headset sockets added inside Sim and connects via USB through firewall and directly into back of secondary PC (failed
 to work properly when connected via the USB hub).
 
 Classroom PC runs radiotelephony.exe with arg = SIM. This starts a Teamspeak server and a Teamspeak client. The
