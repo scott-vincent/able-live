@@ -23,3 +23,35 @@ To Create RAM Disk:
 sudo mkdir /mem
 vi /etc/fstab
   tmpfs /mem tmpfs nodev,nosuid,size=1M,nofail 0 0
+
+Radiotephony Feature Added
+--------------------------
+Hardware PTT switch wired up and connected to G-NIUS secondary PC via USB hub behind radio stack. Had to install
+joy2key.exe as the PTT button wasn't being detected properly in Teamspeak so mapped it to 'p' key.
+
+Headset sockets added inside Sim and connect via USB through firewall and directly into back of secondary PC (failed
+to work properly when connected via the USB hub).
+
+Classroom PC runs radiotelephony.exe with arg = SIM. This starts a Teamspeak server and a Teamspeak client. The
+client connects to the server using address 127.0.0.1. It also sends its own IP to able-live2 (UDP to gnius-live
+process). It gets the IP address of able-live2 using Tailscale (/mem/able-live.ip). It receives aircraft location
++ RT data from the gnius-live process running on able-live2. RT data is displayed in the RT GUI and aircraft location
+is written to a whazzup.txt file that is read by Little Navmap.
+
+G-NIUS Sim main PC runs aerobility_data_link.exe which sends aircraft location + RT data to able-live2 (UDP to
+gnius-live process). It gets the IP address of able-live2 using Tailscale (/mem/able-live.ip).
+
+G-EFIS Sim PC runs g1000_data_link.exe which sends aircraft location to able-live2 (UDP to able-live process).
+It gets the IP address of able-live2 using Tailscale (/mem/able-live.ip).
+
+G-NIUS Sim Secondary PC runs a Teamspeak client which connects to the Teamspeak server running on Classroom PC. It gets
+the IP address of the classroom PC using Tailscale (/mem/teamspeak.ip). The sim headset connects to this Teamspeak.
+
+Host able-live2 (RasPi4) runs gnius-live and able-live. The gnius-live process receives data from the G-NIUS sim and
+forwards it to both able-live (127.0.0.1) and the classroom PC (gets IP from Tailscale /mem/teamspeak.ip). It also
+receives the IP address of the classroom PC via UDP and writes it to the local /mem/teamspeak.ip file.
+The able-live process receives data from the G-NIUS sim (forwarded by gnius-live), the G-EFIS sim (directly),
+flightradar24 and pilotaware (running on the Raspberry Pi in Al's office). The able-live process displays all the
+aircraft data on the map showing on the large screen in the classroom.
+
+Host able-live2 also runs /home/pi/able-live/init.sh at reboot to write its own IP address to /mem/able-live.ip
