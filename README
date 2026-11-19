@@ -55,3 +55,6 @@ flightradar24 and pilotaware (running on the Raspberry Pi in Al's office). The a
 aircraft data on the map showing on the large screen in the classroom.
 
 Host able-live2 also runs /home/pi/able-live/init.sh at reboot to write its own IP address to /mem/able-live.ip
+
+NOTE: Update file /home/pi/able-live.uri on both able-display and able-display-al to retrieve data from able-live2:
+https://able-live2.tail518e1b.ts.net/pilotaware_data
