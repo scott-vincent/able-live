@@ -4,13 +4,13 @@ then
   while [ "$ip" = "" ]
   do
     sleep 1
-    ip=`ifconfig | grep broadcast | grep -oE "\b([0-9]{1,3}\.*){3}[0-9]{1,3}\b" | head -n 1`
+    ip=`/usr/sbin/ifconfig | grep broadcast | grep -oE "\b([0-9]{1,3}\.*){3}[0-9]{1,3}\b" | head -n 1`
   done
   while [ ! -d /mem ]
   do
     sleep 1
   done
-  ip=`ifconfig | grep broadcast | grep -oE "\b([0-9]{1,3}\.*){3}[0-9]{1,3}\b" | head -n 1`
+  ip=`/usr/sbin/ifconfig | grep broadcast | grep -oE "\b([0-9]{1,3}\.*){3}[0-9]{1,3}\b" | head -n 1`
   file="/mem/able-live.ip"
 elif [ "$1" = "teamspeak" ]
 then
