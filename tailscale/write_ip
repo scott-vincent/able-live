@@ -1,5 +1,15 @@
 if [ "$1" = "able-live" ]
 then
+  ip=""
+  while [ "$ip" = "" ]
+  do
+    ip=`hostname -I | cut -f 1 -d " "`
+    sleep 1
+  done
+  while [ ! -d /mem ]
+  do
+    sleep 1
+  done
   ip=`hostname -I | cut -f 1 -d " "`
   file="/mem/able-live.ip"
 elif [ "$1" = "teamspeak" ]
@@ -16,5 +26,11 @@ else
   exit 1
 fi
 
-echo -n $ip >$file
+echo -n $ip >$file || exit
 echo "$ip written to $file"
+chown pi:pi $file
+chmod 666 $file
+
+file="/mem/teamspeak.ip"
+chown pi:pi $file
+chmod 666 $file
