@@ -1248,15 +1248,19 @@ void showChart()
         if (milliDiff(lastFetch, now) > 1800 && !paused) {
             lastFetch = now;
             if (GetLiveData()) {
+                printf("Got live data\n");
+                fflush(stdout);
                 lastSuccess = now;
                 _settings.excludeHighAlt = _haveAble;
                 initView();
             }
             else if (milliDiff(lastSuccess, now) > 300000) {
+                printf("Not got live data\n");
                 printf("Too many errors: quitting\n");
+                fflush(stdout);
                 _quit = true;
             }
-            else if (milliDiff(lastSuccess, now) > 30000) {
+            else if (milliDiff(lastSuccess, now) > 60000) {
                 cleanupTags();
                 _aircraftCount = 0;
             }
