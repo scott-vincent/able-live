@@ -10,13 +10,14 @@ while [ 1 ]
 do
   if [ ! -f /usr/local/bin/able-suppress.dat ]
   then
-    #/home/pi/get-pilotaware-url.sh >>$log
+    /home/pi/get-pilotaware-url.sh >>$log
     cd /home/pi/able-live/able-live
     ./able-live >>$log
   fi
 
   if [ -f /usr/local/bin/able-suppress.dat ]
   then
+    pkill able-live
     echo Paused >>$log
     while [ -f /usr/local/bin/able-suppress.dat ]
     do
