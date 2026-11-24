@@ -12,7 +12,12 @@ do
   then
     /home/pi/get-pilotaware-url.sh >>$log
     cd /home/pi/able-live/able-live
-    ./able-live >>$log
+    echo Restarted >>$log
+    nohup ./able-live >>$log 2>&1 &
+    while [ ! -f /usr/local/bin/able-suppress.dat ]
+    do
+      sleep 1
+    done
   fi
 
   if [ -f /usr/local/bin/able-suppress.dat ]
@@ -23,7 +28,6 @@ do
     do
       sleep 1
     done
-  else
     echo Restarting in 5 seconds >>$log
     sleep 5
   fi
