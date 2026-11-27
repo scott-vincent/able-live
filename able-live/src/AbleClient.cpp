@@ -119,9 +119,6 @@ void fixCallsign(char* callsign)
     else if (strcmp(suffix, "OMJA") == 0) {
         strcpy(callsign, "ABLE02");
     }
-    else if (strcmp(suffix, "BCIR") == 0) {
-        strcpy(callsign, "ABLE03");
-    }
     else if (strcmp(suffix, "BMFP") == 0) {
         strcpy(callsign, "ABLE04");
     }
