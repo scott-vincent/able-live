@@ -97,6 +97,10 @@ void fixCallsign(char* callsign)
         strcpy(callsign, "ABLE10");
     }
     
+    if (strcmp(callsign, "ABLE2E") == 0) {
+        strcpy(callsign, "ABLE09");
+    }
+    
     if (strlen(callsign) < 4 || callsign[0] != 'G') {
         return;
     }
@@ -132,6 +136,9 @@ void fixCallsign(char* callsign)
     }
     else if (strcmp(suffix, "SAUP") == 0) {
         strcpy(callsign, "ABLE08");
+    }
+    else if (strcmp(suffix, "OFWD") == 0) {
+        strcpy(callsign, "ABLE09");
     }
     else if (strcmp(suffix, "OFTR") == 0) {
         strcpy(callsign, "ABLE10");
